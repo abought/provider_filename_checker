@@ -16,22 +16,22 @@ TROUBLESOME_CHARACTERS= [
     '\t', '\n', '\r\n'  # Control characters
 ]
 
+# Some examples courtesy of https://github.com/minimaxir/big-list-of-naughty-strings/blob/master/blns.txt
 FRIN_CHARS_YALL = [
-    # TODO: Unicode, umlauts, etc
-    # Sort of foreign
-    # Generic unicode
-    # Esoteric unicode from the twilight zone
+    'á', 'é', 'ä', '©', 'µ', 'ñ', '§', # Things that can be expressed in ASCII
+    'œ', '∑', '´', '®', '†', '¥', '¨', 'ˆ', 'ø', 'π', '“', '‘',  # Relatively simple unicode (like smart quotes)
+    '部落格', ' ͡° ͜ʖ ͡°', '👩🏽', 'Ⱥ', 'ⱥ', '💩'   # Weird unicode from BLNS; skintone should be one char
 ]
 
 
-def write_for_sequence(out_fn: str, charset: list, *, position: int=1):
+def write_for_sequence(out_fn: str, charset: list, *, position: int=1, mode='w'):
     """
     :param out_fn: Where to write the list of scenarios
     :param charset: A list of chars to use
     :param position: 0 for start of string, 1 for middle, -1 for end
     :return: 
     """
-    with open(out_fn, 'a') as f:
+    with open(out_fn, mode) as f:
         writer = csv.writer(f, quoting=csv.QUOTE_ALL)
         for c in charset:
             if position == 0:
@@ -58,8 +58,8 @@ def verify_readable(filename):
 
 if __name__ == '__main__':
     write_for_sequence('../scenarios/special-char-tests.csv', TROUBLESOME_CHARACTERS, position=0)
-    write_for_sequence('../scenarios/special-char-tests.csv', TROUBLESOME_CHARACTERS, position=1)
-    write_for_sequence('../scenarios/special-char-tests.csv', TROUBLESOME_CHARACTERS, position=2)
+    write_for_sequence('../scenarios/special-char-tests.csv', TROUBLESOME_CHARACTERS, position=1, mode='a')
+    write_for_sequence('../scenarios/special-char-tests.csv', TROUBLESOME_CHARACTERS, position=-1, mode='a')
 
     write_for_sequence('../scenarios/encodings-tests.csv', FRIN_CHARS_YALL, position=1)
 
