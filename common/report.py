@@ -15,7 +15,7 @@ class Report(typing.NamedTuple):
     returned_match: typing.Union(str, None)
 
 
-async def report_writer(reports: typing.AsyncIterator[Report], provider_name: str, out_dir=None):
+async def report_writer(reports: typing.AsyncIterator[Report], provider_name: str, *, out_dir=None):
     out_fn = os.path.join(out_dir, f'{provider_name}.csv')
 
     with open(out_fn, 'r') as f:

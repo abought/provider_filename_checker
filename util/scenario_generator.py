@@ -1,4 +1,4 @@
-"""Generate a set of scenarios based on character sequences known to cause problems"""
+"""Generate a set of scenarios (filenames) based on character sequences known to cause problems"""
 
 import csv
 
@@ -26,9 +26,12 @@ FRIN_CHARS_YALL = [
 
 def write_for_sequence(out_fn: str, charset: list, *, position: int=1, mode='w'):
     """
+    Write a CSV file with (prose, filename) entries describing things to test out 
+    
     :param out_fn: Where to write the list of scenarios
     :param charset: A list of chars to use
     :param position: 0 for start of string, 1 for middle, -1 for end
+    :mode Whether to open the file as write ('w') or append ('a')
     :return: 
     """
     with open(out_fn, mode) as f:
@@ -53,7 +56,6 @@ def verify_readable(filename):
         reader = csv.reader(f)
         # Force reading all rows
         pp(list(reader))
-
 
 
 if __name__ == '__main__':

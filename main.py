@@ -4,10 +4,12 @@ choose to use only a subset of the available filename samples and providers.
 """
 
 import argparse
+import asyncio
 import csv
 import glob
 import os
 import platform
+import typing
 
 from .common import make_requests, report
 
@@ -24,7 +26,7 @@ def parse_args():
     return parser.parse_args()
 
 
-def get_scenario_locations(*, desired_scenarios: list = None) -> list:
+def get_scenario_locations(*, desired_scenarios: typing.Iterable = ()) -> list:
     """Get the list of available filename scenarios to test. Optionally filter by name, like `platform-tests`"""
     filenames = glob.glob(os.path.join(SCENARIOS_PATH, '*.csv'))
 
@@ -51,31 +53,32 @@ def load_scenarios(filenames: list):
             yield (prose, test_fn)
 
 
-async def pipeline(provider, filenames):
+async def pipeline(provider, scenarios):
     """
     Define a pipeline of tasks to run in series
     :return: 
     """
     # TODO: Rewrite to take better advantage of async behaviors
+    # TODO: Take a provider object instead of a string object
     # 1. Authorize for this provider (with credentials)
     # 2. Schedule something on the runloop to start making requests for this provider
     # 3. As responses come in, start writing them to an output file report
 
-    # TODO: want to treat this as iterator, not coroutine?
-    trial_reports = make_requests.serial_requests(provider, filenames)
+    trial_reports = make_requests.serial_requests(provider, scenarios)
 
-    out_dir = os.path.join
-    report.report_writer(trial_reports, 'aprovider', )
+    # TODO: need to make sure that we have the provider name when passed a wb provider object
+    provider_name = provider  # .NAME
+    out_dir = os.path.join(REPORTS_PATH, provider_name)
+    report.report_writer(trial_reports, provider_name, out_dir=out_dir)
 
 
 def check_provider(provider: str, scenarios: list):
     """Import the modules associated with a provider, setup connections, then perform the pipeline of requests"""
     # TODO: Find provider, load associated auth credentials from file, and set up authorization. Then call pipeline
+    asyncio.ensure_future(pipeline(provider, scenarios))
 
-    pass
 
-
-def check_providers(*, providers=None, scenario_names: list=None):
+def check_providers(*, providers: typing.Iterable[str]=(), scenario_names: typing.List[str]=None):
     """Check a series of providers"""
     providers = providers or []
     scenario_filenames = get_scenario_locations(desired_scenarios=scenario_names)
@@ -92,4 +95,6 @@ if __name__ == '__main__':
         raise RuntimeError('For accurate results, must use Python >= 3.6')
 
     args = parse_args()
-    check_providers(providers=args.providers, scenario_names=args.scenarios)
+    # check_providers(providers=args.providers, scenario_names=args.scenarios)
+
+    check_providers(providers=['aprovider'])
