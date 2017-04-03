@@ -23,7 +23,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--providers', nargs='*', help='The name of the storage provider(s) to try')
     parser.add_argument('--scenarios', nargs='*', help='The name(s) of the filename trial suite(s) to try')
-    parser.add_argument('--delay', default=0.5, type=float,
+    parser.add_argument('--delay', default=0.25, type=float,
                         help='The time between requests (throttles to avoid overwhelming server)')
     return parser.parse_args()
 
@@ -55,7 +55,7 @@ def load_scenarios(filenames: list):
             yield (prose, test_fn)
 
 
-async def pipeline(provider, scenarios):
+async def pipeline(provider, scenarios, *, delay: typing.Union[float, None]=None):
     """
     Define a pipeline of tasks to run in series
     :return: 
@@ -66,7 +66,7 @@ async def pipeline(provider, scenarios):
     # 2. Schedule something on the runloop to start making requests for this provider
     # 3. As responses come in, start writing them to an output file report
 
-    trial_reports = make_requests.serial_requests(provider, scenarios)
+    trial_reports = make_requests.serial_requests(provider, scenarios, delay=delay)
 
     # TODO: need to make sure that we have the provider name when passed a wb provider object
     provider_name = provider  # .NAME
@@ -74,19 +74,20 @@ async def pipeline(provider, scenarios):
     await report.report_writer(trial_reports, provider_name, out_fn=out_fn)
 
 
-def check_provider(provider_name: str, scenarios: list) -> typing.Awaitable:
+def check_provider(provider_name: str, scenarios: list, delay: typing.Union[float, None]=None) -> typing.Awaitable:
     """Import the modules associated with a provider, setup connections, then perform the pipeline of requests"""
     # TODO: Find provider, load associated auth credentials from file, and set up authorization. Then call pipeline
-    return asyncio.ensure_future(pipeline(provider_name, scenarios))
+    return asyncio.ensure_future(pipeline(provider_name, scenarios, delay=delay))
 
 
 def check_providers(*, providers: typing.Iterable[str]=(),
-                    scenario_names: typing.List[str]=None) -> typing.List[typing.Awaitable]:
+                    scenario_names: typing.List[str]=None,
+                    delay: typing.Union[float, None]=None) -> typing.List[typing.Awaitable]:
     """Check a series of providers"""
     providers = providers or []
     scenario_filenames = get_scenario_locations(desired_scenarios=scenario_names)
     scenarios = list(load_scenarios(scenario_filenames))
-    return [check_provider(provider, scenarios) for provider in providers]
+    return [check_provider(provider, scenarios, delay=delay) for provider in providers]
 
 
 if __name__ == '__main__':
@@ -94,9 +95,9 @@ if __name__ == '__main__':
         raise RuntimeError('For accurate results, must use Python >= 3.6')
 
     args = parse_args()
-    # check_providers(providers=args.providers, scenario_names=args.scenarios)
+    # check_providers(providers=args.providers, scenario_names=args.scenarios, delay=args.delay)
 
     loop = loop = asyncio.get_event_loop()
-    futures = check_providers(providers=['aprovider', 'bprovider'])
+    futures = check_providers(providers=['aprovider', 'bprovider'], delay=args.delay)
     loop.run_until_complete(asyncio.gather(*futures))
     loop.close()

@@ -37,10 +37,11 @@ async def check_one_filename(provider, scenario):
     )
 
 
-async def serial_requests(provider, scenarios: typing.Iterator):  # TODO: python 29198 # -> typing.AsyncGenerator:
+async def serial_requests(provider, scenarios: typing.Iterator, delay: typing.Union[float, None]=None):  # TODO: python 29198 # -> typing.AsyncGenerator:
     """Make a series of requests to the specified provider"""
     for scenario in scenarios:
         results = await check_one_filename(provider, scenario)
         yield results
-        await asyncio.sleep(0.25)
+        if delay:
+            await asyncio.sleep(delay)
 
