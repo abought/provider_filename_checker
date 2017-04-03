@@ -18,9 +18,8 @@ async def check_one_filename(provider, scenario):
 
     # TODO: Upload
     # TODO: Download
-    # TODO: Generate and format report
 
-    # TODO: This is not so useful. Eventually, start yielding from a request instead to get the data.
+    # TODO: check a request to format report correctly
     their_fn = 'bob'
 
     is_match = None
@@ -38,13 +37,10 @@ async def check_one_filename(provider, scenario):
     )
 
 
-async def serial_requests(provider, scenarios: typing.Iterator) -> typing.AsyncGenerator:
+async def serial_requests(provider, scenarios: typing.Iterator):  # TODO: python 29198 # -> typing.AsyncGenerator:
     """Make a series of requests to the specified provider"""
     for scenario in scenarios:
-        ## TODO: Do this for each fn?
-        #
-        # TODO: Can this be asyncier?
-        results = check_one_filename(provider, scenario)
+        results = await check_one_filename(provider, scenario)
         yield results
-        await asyncio.sleep(0.5)
+        await asyncio.sleep(0.25)
 

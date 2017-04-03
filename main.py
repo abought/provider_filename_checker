@@ -8,10 +8,10 @@ import asyncio
 import csv
 import glob
 import os
-import platform
+import sys
 import typing
 
-from .common import make_requests, report
+from common import make_requests, report
 
 
 HERE = os.path.dirname(__file__)
@@ -23,6 +23,8 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--providers', nargs='*', help='The name of the storage provider(s) to try')
     parser.add_argument('--scenarios', nargs='*', help='The name(s) of the filename trial suite(s) to try')
+    parser.add_argument('--delay', default=0.5, type=float,
+                        help='The time between requests (throttles to avoid overwhelming server)')
     return parser.parse_args()
 
 
@@ -68,33 +70,33 @@ async def pipeline(provider, scenarios):
 
     # TODO: need to make sure that we have the provider name when passed a wb provider object
     provider_name = provider  # .NAME
-    out_dir = os.path.join(REPORTS_PATH, provider_name)
-    report.report_writer(trial_reports, provider_name, out_dir=out_dir)
+    out_fn = os.path.join(REPORTS_PATH, f'{provider_name}.csv')
+    await report.report_writer(trial_reports, provider_name, out_fn=out_fn)
 
 
-def check_provider(provider: str, scenarios: list):
+def check_provider(provider_name: str, scenarios: list) -> typing.Awaitable:
     """Import the modules associated with a provider, setup connections, then perform the pipeline of requests"""
     # TODO: Find provider, load associated auth credentials from file, and set up authorization. Then call pipeline
-    asyncio.ensure_future(pipeline(provider, scenarios))
+    return asyncio.ensure_future(pipeline(provider_name, scenarios))
 
 
-def check_providers(*, providers: typing.Iterable[str]=(), scenario_names: typing.List[str]=None):
+def check_providers(*, providers: typing.Iterable[str]=(),
+                    scenario_names: typing.List[str]=None) -> typing.List[typing.Awaitable]:
     """Check a series of providers"""
     providers = providers or []
     scenario_filenames = get_scenario_locations(desired_scenarios=scenario_names)
     scenarios = list(load_scenarios(scenario_filenames))
-
-    for provider in providers:
-        # TODO: Schedule each provider on runloop separately?
-        check_provider(provider, scenarios)
+    return [check_provider(provider, scenarios) for provider in providers]
 
 
 if __name__ == '__main__':
-    major, minor, patch = platform.python_version_tuple()
-    if minor < 6:
+    if sys.version_info < (3, 6):
         raise RuntimeError('For accurate results, must use Python >= 3.6')
 
     args = parse_args()
     # check_providers(providers=args.providers, scenario_names=args.scenarios)
 
-    check_providers(providers=['aprovider'])
+    loop = loop = asyncio.get_event_loop()
+    futures = check_providers(providers=['aprovider', 'bprovider'])
+    loop.run_until_complete(asyncio.gather(*futures))
+    loop.close()

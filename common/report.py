@@ -12,13 +12,11 @@ class Report(typing.NamedTuple):
     our_fn: str
     their_fn: str
     upload_status_code: int
-    returned_match: typing.Union(str, None)
+    returned_match: typing.Union[str, None]
 
 
-async def report_writer(reports: typing.AsyncIterator[Report], provider_name: str, *, out_dir=None):
-    out_fn = os.path.join(out_dir, f'{provider_name}.csv')
-
-    with open(out_fn, 'r') as f:
+async def report_writer(reports: typing.AsyncIterator[Report], provider_name: str, *, out_fn=None):
+    with open(out_fn, 'w') as f:
         writer = csv.writer(f, quoting=csv.QUOTE_ALL)
         headers = [
             'Scenario name',
