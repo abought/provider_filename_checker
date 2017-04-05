@@ -1,1 +1,6 @@
+# Dependencies for this package
 aiohttp==2.0.5
+
+## Install a local version of waterbutler as a standalone module
+#-e ../waterbutler
+#-r ../waterbutler/requirements.txt

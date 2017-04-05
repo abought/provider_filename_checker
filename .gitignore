@@ -2,3 +2,5 @@
 /env
 /util/*.csv
 /reports/*
+/settings/**/*
+!/settings/local-dist.py

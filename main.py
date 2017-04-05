@@ -23,7 +23,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--providers', nargs='*', help='The name of the storage provider(s) to try')
     parser.add_argument('--scenarios', nargs='*', help='The name(s) of the filename trial suite(s) to try')
-    parser.add_argument('--delay', default=0.25, type=float,
+    parser.add_argument('--delay', default=0.2, type=float,
                         help='The time between requests (throttles to avoid overwhelming server)')
     return parser.parse_args()
 
@@ -55,12 +55,13 @@ def load_scenarios(filenames: list):
             yield (prose, test_fn)
 
 
-async def pipeline(provider, scenarios, *, delay: typing.Union[float, None]=None):
+async def pipeline(provider,
+                   scenarios, *,
+                   delay: typing.Union[float, None]=None):
     """
     Define a pipeline of tasks to run in series
     :return: 
     """
-    # TODO: Rewrite to take better advantage of async behaviors
     # TODO: Take a provider object instead of a string object
     # 1. Authorize for this provider (with credentials)
     # 2. Schedule something on the runloop to start making requests for this provider
@@ -74,7 +75,9 @@ async def pipeline(provider, scenarios, *, delay: typing.Union[float, None]=None
     await report.report_writer(trial_reports, provider_name, out_fn=out_fn)
 
 
-def check_provider(provider_name: str, scenarios: list, delay: typing.Union[float, None]=None) -> typing.Awaitable:
+def check_provider(provider_name: str,
+                   scenarios: list,
+                   delay: typing.Union[float, None]=None) -> typing.Awaitable:
     """Import the modules associated with a provider, setup connections, then perform the pipeline of requests"""
     # TODO: Find provider, load associated auth credentials from file, and set up authorization. Then call pipeline
     return asyncio.ensure_future(pipeline(provider_name, scenarios, delay=delay))
@@ -92,12 +95,12 @@ def check_providers(*, providers: typing.Iterable[str]=(),
 
 if __name__ == '__main__':
     if sys.version_info < (3, 6):
-        raise RuntimeError('For accurate results, must use Python >= 3.6')
+        raise RuntimeError('For best results, must use Python >= 3.6')
 
     args = parse_args()
-    # check_providers(providers=args.providers, scenario_names=args.scenarios, delay=args.delay)
 
     loop = loop = asyncio.get_event_loop()
-    futures = check_providers(providers=['aprovider', 'bprovider'], delay=args.delay)
+    # futures = check_providers(providers=args.providers, scenario_names=args.scenarios, delay=args.delay)
+    futures = check_providers(providers=['googledrive'], scenario_names=['platform-tests'], delay=args.delay)
     loop.run_until_complete(asyncio.gather(*futures))
     loop.close()
