@@ -35,7 +35,7 @@ def write_for_sequence(out_fn: str, charset: list, *, position: int=1, mode='w')
     :return: 
     """
     with open(out_fn, mode) as f:
-        writer = csv.writer(f, quoting=csv.QUOTE_ALL)
+        writer = csv.writer(f, dialect='unix')
         for c in charset:
             if position == 0:
                 sample_str = "{}filename.txt".format(c)

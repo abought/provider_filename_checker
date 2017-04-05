@@ -48,7 +48,7 @@ def load_scenarios(filenames: list):
     """Return an iterator over all available test situations"""
     for fn in filenames:
         with open(fn, 'r') as f:
-            reader = csv.reader(f)
+            reader = csv.reader(f, dialect='unix')
             rows = list(reader)
 
         for prose, test_fn in rows:
@@ -101,6 +101,6 @@ if __name__ == '__main__':
 
     loop = loop = asyncio.get_event_loop()
     # futures = check_providers(providers=args.providers, scenario_names=args.scenarios, delay=args.delay)
-    futures = check_providers(providers=['googledrive'], scenario_names=['platform-tests'], delay=args.delay)
+    futures = check_providers(providers=['dropbox', 'googledrive'], scenario_names=['platform-tests'], delay=args.delay)
     loop.run_until_complete(asyncio.gather(*futures))
     loop.close()

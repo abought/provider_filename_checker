@@ -21,6 +21,7 @@ async def check_one_filename(provider: str,
                              scenario: typing.Tuple[str, str]):
     """Perform a set of upload/download tests for one filename from a list of provided ones"""
     prose, fn = scenario
+    print(f'Checking: {provider} for {fn}')
 
     params = {
         'kind': 'file',
@@ -36,7 +37,7 @@ async def check_one_filename(provider: str,
 
     is_match = None
     for match_type, method in behaviors.COMPARISONS.items():
-        if method(fn, their_fn):
+        if their_fn and method(fn, their_fn):
             is_match = match_type
             break
 
