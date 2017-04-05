@@ -22,10 +22,11 @@ REPORTS_PATH = os.path.join(HERE, 'reports')
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--providers', nargs='*', help='The name of the storage provider(s) to try')
+    parser.add_argument('--providers', nargs='*', default=settings.KNOWN_PROVIDERS,
+                        help='The name of the storage provider(s) to try')
     parser.add_argument('--scenarios', nargs='*', help='The name(s) of the filename trial suite(s) to try')
     parser.add_argument('--delay', default=0.2, type=float,
-                        help='The time between requests (throttles to avoid overwhelming server)')
+                        help='The time between requests, in seconds (throttles to avoid overwhelming server)')
     return parser.parse_args()
 
 
@@ -88,7 +89,6 @@ def check_providers(*, providers: typing.Iterable[str]=(),
                     scenario_names: typing.List[str]=None,
                     delay: typing.Union[float, None]=None) -> typing.List[typing.Awaitable]:
     """Check a series of providers"""
-    providers = providers or settings.KNOWN_PROVIDERS
     scenario_filenames = get_scenario_locations(desired_scenarios=scenario_names)
     scenarios = list(load_scenarios(scenario_filenames))
     return [check_provider(provider, scenarios, delay=delay) for provider in providers]
