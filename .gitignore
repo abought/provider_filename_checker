@@ -1,7 +1,6 @@
 /credentials/**/*.py
 /env
 /util/*.csv
-/reports/*.csv
 /settings/**/*
 !/settings/local-dist.py
 !/settings/__init__.py

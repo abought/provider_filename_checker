@@ -12,6 +12,7 @@ import sys
 import typing
 
 from common import make_requests, report
+import settings
 
 
 HERE = os.path.dirname(__file__)
@@ -87,7 +88,7 @@ def check_providers(*, providers: typing.Iterable[str]=(),
                     scenario_names: typing.List[str]=None,
                     delay: typing.Union[float, None]=None) -> typing.List[typing.Awaitable]:
     """Check a series of providers"""
-    providers = providers or []
+    providers = providers or settings.KNOWN_PROVIDERS
     scenario_filenames = get_scenario_locations(desired_scenarios=scenario_names)
     scenarios = list(load_scenarios(scenario_filenames))
     return [check_provider(provider, scenarios, delay=delay) for provider in providers]
@@ -100,7 +101,7 @@ if __name__ == '__main__':
     args = parse_args()
 
     loop = loop = asyncio.get_event_loop()
-    # futures = check_providers(providers=args.providers, scenario_names=args.scenarios, delay=args.delay)
-    futures = check_providers(providers=['dropbox', 'googledrive'], scenario_names=['platform-tests'], delay=args.delay)
+    futures = check_providers(providers=args.providers, scenario_names=args.scenarios, delay=args.delay)
+    #futures = check_providers(providers=['dropbox', 'googledrive'], scenario_names=['platform-tests'], delay=args.delay)
     loop.run_until_complete(asyncio.gather(*futures))
     loop.close()
