@@ -10,6 +10,7 @@ import glob
 import os
 import sys
 import typing
+import uuid
 
 from common import make_requests, report
 import providers
@@ -83,10 +84,17 @@ async def pipeline(provider: providers.base.Provider,
     Define a pipeline of tasks to run in series
     :return: 
     """
-    # TODO: Take a provider object instead of a string object
     # 1. Authorize for this provider (with credentials)
     # 2. Schedule something on the runloop to start making requests for this provider
     # 3. As responses come in, start writing them to an output file report
+    # TODO: Make more configurable for providers (to get correct auth)?
+    await provider.authorize(token=settings.OSF_TOKEN)
+
+    # Create a folder where tests will be run
+    dest_foldername = uuid.uuid4().hex
+    folder_id, _ = await provider.create_folder(dest_foldername)
+    # Some providers can choose to respect this setting for all requests, and do upload tests within this folder
+    provider.parent_folder = folder_id
 
     trial_reports = make_requests.serial_requests(provider, scenarios, delay=delay)
 
@@ -105,8 +113,6 @@ def run_single_provider(provider_name: str,
         ProviderClass = KNOWN_PROVIDERS[provider_name]
 
     provider = ProviderClass(provider_name=provider_name)
-    # TODO: Make more configurable for providers (to get correct auth)?
-    provider.authorize(token=settings.OSF_TOKEN)
 
     return asyncio.ensure_future(pipeline(provider, scenarios, delay=delay))
 
@@ -128,7 +134,7 @@ if __name__ == '__main__':
     args = parse_args()
 
     loop = loop = asyncio.get_event_loop()
-    futures = main(providers=args.providers, scenario_names=args.scenarios, delay=args.delay, use_wb=args.wb)
-    #futures = main(providers=['osfstorage'], scenario_names=['special-char-tests'], delay=0.01, use_wb=True)
+    #futures = main(providers=args.providers, scenario_names=args.scenarios, delay=args.delay, use_wb=args.wb)
+    futures = main(providers=['osfstorage'], scenario_names=['special-char-tests'], delay=0.01, use_wb=True)
     loop.run_until_complete(asyncio.gather(*futures))
     loop.close()

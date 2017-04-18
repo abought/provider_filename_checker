@@ -15,19 +15,22 @@ class Provider(abc.ABC):
         self.token = None
         self.auth_headers = {}
 
+        # Optionally, run *all* file operations within a specific folder (deliberately not general)
+        self.parent_folder = None
+
     @abc.abstractmethod
-    def authorize(self, *args, **kwargs):
+    async def authorize(self, *args, **kwargs):
         pass
 
     @abc.abstractmethod
     async def upload_file(self, filename, content):
         pass
 
-    # TODO: Add other abstract methods as needed
-    # @abc.abstractmethod
-    # def create_folder(self, foldername: str):
-    #     pass
+    @abc.abstractmethod
+    def create_folder(self, foldername: str):
+        pass
 
+    # TODO: Add other abstract methods as needed
     # @abc.abstractmethod
     # def download_file(self):
     #     pass
@@ -53,7 +56,7 @@ class OauthProvider(Provider, abc.ABC):
     def __init__(self, *args, **kwargs):
         super(OauthProvider, self).__init__(*args, **kwargs)
 
-    def authorize(self, *args, token: str=None, **kwargs):
+    async def authorize(self, *args, token: str=None, **kwargs):
         self.token = token
         self.auth_headers = {
             'Authorization': 'Bearer {}'.format(token),
