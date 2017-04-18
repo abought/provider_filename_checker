@@ -6,19 +6,19 @@ from pprint import pprint as pp
 
 
 # Things that, in themselves, cause problems for operating systems by their presence
-TROUBLESOME_CHARACTERS= [
+TROUBLESOME_CHARACTERS = [
     '#', '%', '?',  # Things that REALLY mess with URL encoding
     '[', ']', '{', '}', '(', ')', '<', '>',  # Parentheses and brackets
-    '|', '~', '`', '!', '@', ' ', '$', '^', '&', '*', '+', '=', ',', ';', ':',  # Iffy
+    '|', '~', '`', '!', '@', ' ', '$', '^', '&', '*', '+', '=', ',', ';', ':', '     ',  # Iffy
     '.', '-', '_',  # Might not need to be encoded at all
     "'", '"',  # Quote marks
     '/', '\\',  # Slashes
-    '\t', '\n', '\r\n'  # Control characters
+    '\x00', '\t', '\n', '\r\n', '\r'  # Control characters- ASCII 0-31
 ]
 
 # Some examples courtesy of https://github.com/minimaxir/big-list-of-naughty-strings/blob/master/blns.txt
 FRIN_CHARS_YALL = [
-    'á', 'é', 'ä', '©', 'µ', 'ñ', '§', # Things that can be expressed in ASCII
+    'á', 'é', 'ä', '©', 'µ', 'ñ', '§',  # Things that can be expressed in ASCII (128+)
     'œ', '∑', '´', '®', '†', '¥', '¨', 'ˆ', 'ø', 'π', '“', '‘',  # Relatively simple unicode (like smart quotes)
     '部落格', ' ͡° ͜ʖ ͡°', '👩🏽', 'Ⱥ', 'ⱥ', '💩'   # Weird unicode from BLNS; skintone should be one char
 ]
