@@ -7,9 +7,12 @@ import aiohttp
 
 class Provider(abc.ABC):
     BASE_URL = None
+    # Default provider name (though we prefer users to pass it in separately)
+    NAME = None
 
-    def __init__(self, *args, token: str=None, **kwargs):
-        self.token = token
+    def __init__(self, *args, provider_name: str=None, **kwargs):
+        self.provider_name = provider_name or self.NAME
+        self.token = None
         self.auth_headers = {}
 
     @abc.abstractmethod
@@ -51,7 +54,8 @@ class OauthProvider(Provider, abc.ABC):
         super(OauthProvider, self).__init__(*args, **kwargs)
 
     def authorize(self, *args, token: str=None, **kwargs):
+        self.token = token
         self.auth_headers = {
-            'Authorization': 'Bearer {}'.format(self.token),
+            'Authorization': 'Bearer {}'.format(token),
             'Content-Type': 'application/json'
         }

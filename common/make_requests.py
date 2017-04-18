@@ -3,37 +3,20 @@ Given a specific provider, handle making a series of requests
 """
 import asyncio
 import typing
-import urllib.parse
-
-import aiohttp
 
 from . import behaviors
 from . import report
-import settings
+from providers import base
 
-# Handle:
-# 1. Authorization
-# 2. Throttling
-# 3. Taking advantage of asyncio to talk to multiple providers in a more efficient manner
-
-
-async def check_one_filename(provider: str,
+async def check_one_filename(provider: base.Provider,
                              scenario: typing.Tuple[str, str]):
     """Perform a set of upload/download tests for one filename from a list of provided ones"""
     prose, fn = scenario
-    print(f'Checking: {provider} for {fn}')
+    print(f'Checking: {provider.provider_name} for {fn}')
 
-    params = {
-        'kind': 'file',
-        'name': fn
-    }
-    headers = {'Authorization': f'Bearer {settings.OSF_TOKEN}'}
-    url = urllib.parse.urljoin(settings.WB_HOST, f'/v1/resources/{settings.OSF_NODE}/providers/{provider}/')
-
-    async with aiohttp.put(url, params=params, headers=headers, data='Any text will do') as resp:
-        code = resp.status
-        json = await resp.json()
-        their_fn = json['data']['attributes']['name'] if code < 400 else None
+    json, code = await provider.upload_file(fn, 'Any text will do')
+    # TODO: Improve how we extract this- make provider-agnostic
+    their_fn = json['data']['attributes']['name'] if code < 400 else None
 
     is_match = None
     for match_type, method in behaviors.COMPARISONS.items():
@@ -50,9 +33,9 @@ async def check_one_filename(provider: str,
     )
 
 
-async def serial_requests(provider: str,
+async def serial_requests(provider: base.Provider,
                           scenarios: typing.Iterator,
-                          delay: typing.Union[float, None]=None):  # TODO: python bug 29198 # -> typing.AsyncGenerator:
+                          delay: typing.Union[float, None]=None) -> typing.AsyncIterator[report.Report]:
     """Make a series of requests to the specified provider"""
     for scenario in scenarios:
         results = await check_one_filename(provider, scenario)

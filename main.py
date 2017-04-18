@@ -12,6 +12,7 @@ import sys
 import typing
 
 from common import make_requests, report
+import providers
 import settings
 
 
@@ -20,9 +21,25 @@ SCENARIOS_PATH = os.path.join(os.path.abspath(HERE), 'scenarios')
 REPORTS_PATH = os.path.join(HERE, 'reports')
 
 
+# Intentionally exclude: Rackspace cloudfiles, filesystem (used internally only),
+# MattF can provide owncloud credentials. For s3 testing, use your own amazon account. For FigShare, use https or
+#   personal token for oauth.
+KNOWN_PROVIDERS = {
+    'box': providers.waterbutler.WBProvider,
+    'dataverse': providers.waterbutler.WBProvider,
+    'dropbox': providers.waterbutler.WBProvider,
+    'figshare': providers.waterbutler.WBProvider,
+    'github': providers.waterbutler.WBProvider,
+    'googledrive': providers.waterbutler.WBProvider,
+    'osfstorage': providers.waterbutler.WBProvider,
+    'owncloud': providers.waterbutler.WBProvider,
+    's3': providers.waterbutler.WBProvider
+}
+
+
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--providers', nargs='*', default=settings.KNOWN_PROVIDERS,
+    parser.add_argument('--providers', nargs='*', default=KNOWN_PROVIDERS.keys(),
                         help='The name of the storage provider(s) to try')
     parser.add_argument('--scenarios', nargs='*', help='The name(s) of the filename trial suite(s) to try')
     parser.add_argument('--delay', default=0.2, type=float,
@@ -57,7 +74,7 @@ def load_scenarios(filenames: list):
             yield (prose, test_fn)
 
 
-async def pipeline(provider,
+async def pipeline(provider: providers.base.Provider,
                    scenarios, *,
                    delay: typing.Union[float, None]=None):
     """
@@ -71,27 +88,31 @@ async def pipeline(provider,
 
     trial_reports = make_requests.serial_requests(provider, scenarios, delay=delay)
 
-    # TODO: need to make sure that we have the provider name when passed a wb provider object
-    provider_name = provider  # .NAME
-    out_fn = os.path.join(REPORTS_PATH, f'{provider_name}.csv')
-    await report.report_writer(trial_reports, provider_name, out_fn=out_fn)
+    out_fn = os.path.join(REPORTS_PATH, f'{provider.provider_name}.csv')
+    await report.report_writer(trial_reports, provider.provider_name, out_fn=out_fn)
 
 
-def check_provider(provider_name: str,
-                   scenarios: list,
-                   delay: typing.Union[float, None]=None) -> typing.Awaitable:
+def run_single_provider(provider_name: str,
+                        scenarios: list,
+                        delay: typing.Union[float, None]=None) -> typing.Awaitable:
     """Import the modules associated with a provider, setup connections, then perform the pipeline of requests"""
     # TODO: Find provider, load associated auth credentials from file, and set up authorization. Then call pipeline
-    return asyncio.ensure_future(pipeline(provider_name, scenarios, delay=delay))
+
+    # TODO: Make this configurable (either generic wb provider, or the specific one)
+    ProviderClass = KNOWN_PROVIDERS[provider_name]
+    provider = ProviderClass(provider_name=provider_name)
+    provider.authorize(token=settings.OSF_TOKEN)
+
+    return asyncio.ensure_future(pipeline(provider, scenarios, delay=delay))
 
 
-def check_providers(*, providers: typing.Iterable[str]=(),
-                    scenario_names: typing.List[str]=None,
-                    delay: typing.Union[float, None]=None) -> typing.List[typing.Awaitable]:
-    """Check a series of providers"""
+def main(*, providers: typing.Iterable[str]=(),
+         scenario_names: typing.List[str]=None,
+         delay: typing.Union[float, None]=None) -> typing.List[typing.Awaitable]:
+    """Perform filename tests for a series of providers"""
     scenario_filenames = get_scenario_locations(desired_scenarios=scenario_names)
     scenarios = list(load_scenarios(scenario_filenames))
-    return [check_provider(provider, scenarios, delay=delay) for provider in providers]
+    return [run_single_provider(provider_name, scenarios, delay=delay) for provider_name in providers]
 
 
 if __name__ == '__main__':
@@ -101,7 +122,7 @@ if __name__ == '__main__':
     args = parse_args()
 
     loop = loop = asyncio.get_event_loop()
-    futures = check_providers(providers=args.providers, scenario_names=args.scenarios, delay=args.delay)
-    #futures = check_providers(providers=['dropbox', 'googledrive'], scenario_names=['platform-tests'], delay=args.delay)
+    futures = main(providers=args.providers, scenario_names=args.scenarios, delay=args.delay)
+    #futures = main(providers=['osfstorage'], scenario_names=['special-char-tests'], delay=0.01)
     loop.run_until_complete(asyncio.gather(*futures))
     loop.close()

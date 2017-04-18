@@ -13,7 +13,7 @@ TROUBLESOME_CHARACTERS = [
     '.', '-', '_',  # Might not need to be encoded at all
     "'", '"',  # Quote marks
     '/', '\\',  # Slashes
-    '\x00', '\t', '\n', '\r\n', '\r'  # Control characters- ASCII 0-31
+    '\x01', '\t', '\n', '\r\n', '\r'  # Control characters- ASCII 0-31
 ]
 
 # Some examples courtesy of https://github.com/minimaxir/big-list-of-naughty-strings/blob/master/blns.txt
