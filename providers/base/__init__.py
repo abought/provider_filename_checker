@@ -18,12 +18,17 @@ class BaseProvider(abc.ABC):
         # Optionally, run *all* file operations within a specific folder (deliberately not general)
         self.parent_folder = None
 
+    @abc.abstractstaticmethod
+    def extract_uploaded_filename(payload: dict=None):
+        """Given the JSON payload from an upload response, extract the uploaded filename (if possible)"""
+        pass
+
     @abc.abstractmethod
     async def authorize(self, *args, **kwargs):
         pass
 
     @abc.abstractmethod
-    async def upload_file(self, filename, content):
+    async def upload_file(self, filename: str, content):
         pass
 
     @abc.abstractmethod
@@ -47,6 +52,7 @@ class BaseProvider(abc.ABC):
 
         async with aiohttp.request(method, url, params=params, headers=headers, data=data) as resp:
             code = resp.status
+            #print('Raw response', await resp.text())
             json = await resp.json()
 
         return json, code
@@ -64,5 +70,4 @@ class OauthBaseProvider(BaseProvider, abc.ABC):
         self.token = token or self.DEFAULT_CREDENTIAL
         self.auth_headers = {
             'Authorization': 'Bearer {}'.format(self.token),
-            'Content-Type': 'application/json'
         }

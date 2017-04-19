@@ -41,5 +41,9 @@ class WBProvider(OauthBaseProvider):
             'kind': 'folder',
             'name': foldername
         }
-        resp, code = await self._make_request('PUT', url, params=params)
+        resp, code = await self._make_request('PUT', url, params=params, headers={'Content-Type': 'application/json'})
         return resp['data']['attributes']['path'], code
+
+    @staticmethod
+    def extract_uploaded_filename(payload: dict=None):
+        return payload['data']['attributes']['name']

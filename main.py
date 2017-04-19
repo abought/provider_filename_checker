@@ -26,7 +26,7 @@ REPORTS_PATH = os.path.join(HERE, 'reports')
 KNOWN_PROVIDERS = {
     'box': providers.WBProvider,
     'dataverse': providers.WBProvider,
-    'dropbox': providers.WBProvider,
+    'dropbox': providers.DropboxProvider,
     'figshare': providers.WBProvider,
     'github': providers.WBProvider,
     'googledrive': providers.WBProvider,
@@ -90,7 +90,8 @@ async def pipeline(provider: providers.BaseProvider,
 
     # Create a folder where tests will be run
     dest_foldername = uuid.uuid4().hex
-    folder_id, _ = await provider.create_folder(dest_foldername)
+    folder_id, code = await provider.create_folder(dest_foldername)
+    print('Created folder ', folder_id, ' for provider ', provider.provider_name, code)
     # Some providers can choose to respect this setting for all requests, and do upload tests within this folder
     provider.parent_folder = folder_id
 
@@ -132,7 +133,7 @@ if __name__ == '__main__':
     args = parse_args()
 
     loop = loop = asyncio.get_event_loop()
-    #futures = main(provider_names=args.providers, scenario_names=args.scenarios, delay=args.delay, use_wb=args.wb)
-    futures = main(provider_names=['osfstorage'], scenario_names=['special-char-tests'], delay=0.01, use_wb=True)
+    futures = main(provider_names=args.providers, scenario_names=args.scenarios, delay=args.delay, use_wb=args.wb)
+    # futures = main(provider_names=['dropbox'], scenario_names=['deleteme'], delay=0.01, use_wb=False)
     loop.run_until_complete(asyncio.gather(*futures))
     loop.close()

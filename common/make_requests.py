@@ -16,8 +16,7 @@ async def check_one_filename(provider: providers.BaseProvider,
     print(f'Checking: {provider.provider_name} for {fn}')
 
     json, code = await provider.upload_file(fn, 'Any text will do')
-    # TODO: Improve how we extract this- make provider-agnostic
-    their_fn = json['data']['attributes']['name'] if code < 400 else None
+    their_fn = provider.extract_uploaded_filename(json) if code < 400 else None
 
     is_match = None
     for match_type, method in behaviors.COMPARISONS.items():
