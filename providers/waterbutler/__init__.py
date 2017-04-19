@@ -43,6 +43,4 @@ class WBProvider(OauthProvider):
             'name': foldername
         }
         resp, code = await self._make_request('PUT', url, params=params)
-
-        print(resp)
         return resp['data']['attributes']['path'], code

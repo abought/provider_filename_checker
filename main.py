@@ -134,7 +134,7 @@ if __name__ == '__main__':
     args = parse_args()
 
     loop = loop = asyncio.get_event_loop()
-    #futures = main(providers=args.providers, scenario_names=args.scenarios, delay=args.delay, use_wb=args.wb)
-    futures = main(providers=['osfstorage'], scenario_names=['special-char-tests'], delay=0.01, use_wb=True)
+    futures = main(providers=args.providers, scenario_names=args.scenarios, delay=args.delay, use_wb=args.wb)
+    #futures = main(providers=['osfstorage'], scenario_names=['special-char-tests'], delay=0.01, use_wb=True)
     loop.run_until_complete(asyncio.gather(*futures))
     loop.close()
