@@ -4,11 +4,12 @@ Given a specific provider, handle making a series of requests
 import asyncio
 import typing
 
+import providers
 from . import behaviors
 from . import report
-from providers import base
 
-async def check_one_filename(provider: base.Provider,
+
+async def check_one_filename(provider: providers.BaseProvider,
                              scenario: typing.Tuple[str, str]):
     """Perform a set of upload/download tests for one filename from a list of provided ones"""
     prose, fn = scenario
@@ -33,7 +34,7 @@ async def check_one_filename(provider: base.Provider,
     )
 
 
-async def serial_requests(provider: base.Provider,
+async def serial_requests(provider: providers.BaseProvider,
                           scenarios: typing.Iterator,
                           delay: typing.Union[float, None]=None) -> typing.AsyncIterator[report.Report]:
     """Make a series of requests to the specified provider"""

@@ -4,18 +4,17 @@ A meta-provider that performs file actions on many different storage hosts, usin
 import typing
 import urllib.parse
 
-from ..base import OauthProvider
+from ..base import OauthBaseProvider
 import settings
 
 
-class WBProvider(OauthProvider):
-    BASE_URL = settings.WB_HOST
-
+class WBProvider(OauthBaseProvider):
+    """A wrapper that uses the WB API to talk to one of a range of storage providers"""
     # Default name, but prefer users to pass it in explicitly (because this is sort of an indirect provider)
     NAME = 'waterbutler'
 
-    def __init__(self, *args, **kwargs):
-        super(WBProvider, self).__init__(*args, **kwargs)
+    BASE_URL = settings.WB_HOST
+    DEFAULT_CREDENTIAL = settings.WATERBUTLER_OSF_TOKEN
 
     async def upload_file(self,
                           filename: str,

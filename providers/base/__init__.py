@@ -5,7 +5,7 @@ import typing
 import aiohttp
 
 
-class Provider(abc.ABC):
+class BaseProvider(abc.ABC):
     BASE_URL = None
     # Default provider name (though we prefer users to pass it in separately)
     NAME = None
@@ -52,13 +52,17 @@ class Provider(abc.ABC):
         return json, code
 
 
-class OauthProvider(Provider, abc.ABC):
+class OauthBaseProvider(BaseProvider, abc.ABC):
+    # Allow provider to bake in "default" credentials, eg from a single centralized settings file
+    DEFAULT_CREDENTIAL = None
+
     def __init__(self, *args, **kwargs):
-        super(OauthProvider, self).__init__(*args, **kwargs)
+        super(OauthBaseProvider, self).__init__(*args, **kwargs)
 
     async def authorize(self, *args, token: str=None, **kwargs):
-        self.token = token
+        """Set authorization headers, optionally using default credentials if none are explicitly passed"""
+        self.token = token or self.DEFAULT_CREDENTIAL
         self.auth_headers = {
-            'Authorization': 'Bearer {}'.format(token),
+            'Authorization': 'Bearer {}'.format(self.token),
             'Content-Type': 'application/json'
         }
