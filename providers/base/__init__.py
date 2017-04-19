@@ -18,28 +18,6 @@ class BaseProvider(abc.ABC):
         # Optionally, run *all* file operations within a specific folder (deliberately not general)
         self.parent_folder = None
 
-    @abc.abstractstaticmethod
-    def extract_uploaded_filename(payload: dict=None):
-        """Given the JSON payload from an upload response, extract the uploaded filename (if possible)"""
-        pass
-
-    @abc.abstractmethod
-    async def authorize(self, *args, **kwargs):
-        pass
-
-    @abc.abstractmethod
-    async def upload_file(self, filename: str, content):
-        pass
-
-    @abc.abstractmethod
-    def create_folder(self, foldername: str):
-        pass
-
-    # TODO: Add other abstract methods as needed
-    # @abc.abstractmethod
-    # def download_file(self):
-    #     pass
-
     async def _make_request(self,
                             method,
                             url, *,
@@ -56,6 +34,23 @@ class BaseProvider(abc.ABC):
             json = await resp.json()
 
         return json, code
+
+    @abc.abstractmethod
+    async def authorize(self, *args, **kwargs):
+        pass
+
+    @abc.abstractmethod
+    async def create_folder(self, foldername: str):
+        pass
+
+    @abc.abstractmethod
+    async def upload_file(self, filename: str, content):
+        pass
+
+    @abc.abstractstaticmethod
+    def extract_uploaded_filename(payload: dict=None):
+        """Given the JSON payload from an upload response, extract the uploaded filename (if possible)"""
+        pass
 
 
 class OauthBaseProvider(BaseProvider, abc.ABC):
