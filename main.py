@@ -24,7 +24,7 @@ REPORTS_PATH = os.path.join(HERE, 'reports')
 # MattF can provide owncloud credentials. For s3 testing, use your own amazon account. For local FigShare, use https,
 # or generate a personal token for oauth.
 KNOWN_PROVIDERS = {
-    'box': providers.WBProvider,
+    'box': providers.BoxProvider,
     'dataverse': providers.WBProvider,
     'dropbox': providers.DropboxProvider,
     'figshare': providers.WBProvider,
@@ -133,7 +133,7 @@ if __name__ == '__main__':
     args = parse_args()
 
     loop = loop = asyncio.get_event_loop()
-    futures = main(provider_names=args.providers, scenario_names=args.scenarios, delay=args.delay, use_wb=args.wb)
-    # futures = main(provider_names=['dropbox'], scenario_names=['deleteme'], delay=0.01, use_wb=False)
+    #futures = main(provider_names=args.providers, scenario_names=args.scenarios, delay=args.delay, use_wb=args.wb)
+    futures = main(provider_names=['box'], scenario_names=['deleteme'], delay=0.01, use_wb=False)
     loop.run_until_complete(asyncio.gather(*futures))
     loop.close()
