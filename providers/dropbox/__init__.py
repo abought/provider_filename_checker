@@ -11,6 +11,7 @@ class DropboxProvider(OauthBaseProvider):
 
     DEFAULT_CREDENTIAL = settings.DROPBOX_OAUTH_TOKEN
     BASE_URL = 'https://api.dropboxapi.com/2/files/'
+    BASE_CONTENT_URL = 'https://content.dropboxapi.com/2/files/'
 
     async def create_folder(self, foldername: str):
         parent_folder = self.parent_folder or '/'
@@ -31,7 +32,7 @@ class DropboxProvider(OauthBaseProvider):
         # If a parent folder is specified, append it to the URL. Otherwise just add a trailing slash.
         parent_folder = self.parent_folder or ''
         # Upload files to a different host than the api base url
-        url = 'https://content.dropboxapi.com/2/files/upload'
+        url = urllib.parse.urljoin(self.BASE_CONTENT_URL, 'upload')
 
         size = len(content.encode('utf-8'))
         headers = {

@@ -6,7 +6,11 @@ import aiohttp
 
 
 class BaseProvider(abc.ABC):
+    # Base url for api requests
     BASE_URL = None
+    # Some providers define a different URL for file uploads
+    BASE_CONTENT_URL = None
+
     # Default provider name (though we prefer users to pass it in separately)
     NAME = None
 
@@ -30,10 +34,10 @@ class BaseProvider(abc.ABC):
 
         async with aiohttp.request(method, url, params=params, headers=headers, data=data) as resp:
             code = resp.status
-            # print('Sending request to', url)
-            # print('Response status:', code, resp.reason)
-            # print('Response headers: ', resp.headers)
-            # print('Response body: ', await resp.text())
+            print('Sending request to', url)
+            print('Response status:', code, resp.reason)
+            print('Response headers: ', resp.headers)
+            print('Response body: ', await resp.text())
             json = await resp.json()
 
         return json, code

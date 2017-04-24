@@ -13,6 +13,7 @@ class BoxProvider(OauthBaseProvider):
 
     DEFAULT_CREDENTIAL = settings.BOX_OAUTH_TOKEN
     BASE_URL = 'https://api.box.com/2.0/'
+    BASE_CONTENT_URL = 'https://upload.box.com/api/2.0/files/'
 
     async def create_folder(self, foldername: str):
         """
@@ -43,7 +44,7 @@ class BoxProvider(OauthBaseProvider):
         # If a parent folder is specified, append it to the URL. Otherwise just add a trailing slash.
         parent_folder = self.parent_folder or '0'
         # Upload files to a different host than the api base url
-        url = 'https://upload.box.com/api/2.0/files/content'
+        url = urllib.parse.urljoin(self.BASE_CONTENT_URL, 'content')
 
         size = len(content.encode('utf-8'))
         # Box uploads are a multipart format
