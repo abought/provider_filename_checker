@@ -9,5 +9,7 @@ OSF_NODE = None  # Let WB handle credentials/ auth: specify an OSF node that has
 WATERBUTLER_OSF_TOKEN = None
 DROPBOX_OAUTH_TOKEN = None
 
-# Personal access tokens that expire after x time
+### Personal access tokens that expire after x time
 BOX_OAUTH_TOKEN = None  # 1 hr, get token from app config page https://app.box.com/developers/services/edit/<app_id>
+GOOGLEDRIVE_OAUTH_TOKEN = None  #  1hr, Get from https://developers.google.com/oauthplayground/ , Scope /auth/drive
+
