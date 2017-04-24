@@ -56,13 +56,17 @@ class BoxProvider(OauthBaseProvider):
 
         # Construct multipart upload type
         with aiohttp.MultipartWriter('form-data') as mpwriter:
-            mpwriter.append_json(body, {'CONTENT-DISPOSITION': 'form-data; name="attributes"'})
+            mpwriter.append_json(body, {aiohttp.hdrs.CONTENT_DISPOSITION: 'form-data; name="attributes"'})
             mpwriter.append(content, headers={
-                'CONTENT-TYPE': 'application/octet-stream',
-                'CONTENT-DISPOSITION': 'form-data; name="file"'
+                aiohttp.hdrs.CONTENT_DISPOSITION: 'form-data; name="file"'
             })
 
-            print(list(mpwriter.serialize()))
+            # TODO: Resume tracing this. Some possible differences involving headers, content length (parts vs whole?)
+            for part in mpwriter:
+                part.headers.pop(aiohttp.hdrs.CONTENT_LENGTH, None)
+
+            for l in mpwriter.serialize():
+                print(l.decode('utf-8'))
 
             return await self._make_request('POST', url, data=mpwriter)
 

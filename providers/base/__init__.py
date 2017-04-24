@@ -30,7 +30,10 @@ class BaseProvider(abc.ABC):
 
         async with aiohttp.request(method, url, params=params, headers=headers, data=data) as resp:
             code = resp.status
-            #print('Raw response', await resp.text())
+            # print('Sending request to', url)
+            # print('Response status:', code, resp.reason)
+            # print('Response headers: ', resp.headers)
+            # print('Response body: ', await resp.text())
             json = await resp.json()
 
         return json, code
