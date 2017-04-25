@@ -1,5 +1,5 @@
 """A provider that talks to Github"""
-import functools
+import base64
 import json
 import os
 import typing
@@ -30,11 +30,10 @@ class GithubProvider(OauthBaseProvider):
                 'name': 'Frodo Baggins',
                 'email': 'frodo@sacksville-bagend.org',  # Intentionally fake email; avoid spamming GH activity
             },
-            'branch': 'master',  # FIXME: ayup, this is hardcoded
+            'branch': 'master',  # FIXME: that's right- this is hardcoded
             'message': 'Test of provider filename behaviors'
         }
 
-        # TODO: should foldername be in url, or is payload sufficient?
         path_encoded = urllib.parse.quote(gk_path)
         url = f'{self.BASE_URL}repos/{settings.GH_REPO_NAME}/contents/{path_encoded}'
 
@@ -46,25 +45,35 @@ class GithubProvider(OauthBaseProvider):
     async def upload_file(self,
                           filename: str,
                           content) -> typing.Tuple[dict, int]:
-        # TODO: Implement
+        """
+        See https://developer.github.com/v3/repos/contents/#create-a-file
+        This API is simpler than the `blobs` endpoint used in WB
+        """
 
-        # If a parent folder is specified, append it to the URL. Otherwise just add a trailing slash.
+        # FIXME: This will only work for top level folders (because full path has to be known and in url). Ok for here.
         parent_folder = self.parent_folder or ''
-        # Upload files to a different host than the api base url
-        url = urllib.parse.urljoin(self.BASE_CONTENT_URL, 'upload')
+        filename = os.path.join(parent_folder, filename)
 
-        size = len(content.encode('utf-8'))
-        headers = {
-            'Content-Type': 'application/octet-stream',
-            'Dropbox-API-Arg': json.dumps(
-                {'path': f'{parent_folder}/{filename}'}
-            ),
-            'Content-Length': str(size),
+        encoded = base64.b64encode(content.encode('utf-8'))
+        data = {
+            'content': encoded.decode('utf-8'),
+            'path': filename,
+            'committer': {
+                'name': 'Frodo Baggins',
+                'email': 'frodo@sacksville-bagend.org',  # Intentionally fake email; avoid spamming GH activity
+            },
+            'branch': 'master',  # FIXME: that's right- this is hardcoded
+            'message': 'Test of provider filename behaviors'
         }
-        return await self._make_request('POST', url, headers=headers, data=content)
+
+        path_encoded = urllib.parse.quote(filename)
+        url = f'{self.BASE_URL}repos/{settings.GH_REPO_NAME}/contents/{path_encoded}'
+
+        return await self._make_request('PUT', url,
+                                        data=json.dumps(data),
+                                        headers={'Content-Type': 'application/json'})
 
     @staticmethod
     def extract_uploaded_filename(payload: dict=None):
         """GH returns the entire path to the entry, not just the filename"""
-        path = payload['path']
-        return os.path.basename(path)
+        return payload['content']['name']
