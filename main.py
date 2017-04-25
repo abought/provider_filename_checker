@@ -28,7 +28,7 @@ KNOWN_PROVIDERS = {
     'dataverse': providers.WBProvider,
     'dropbox': providers.DropboxProvider,
     'figshare': providers.WBProvider,
-    'github': providers.WBProvider,
+    'github': providers.GithubProvider,
     'googledrive': providers.GoogleDriveProvider,
     'osfstorage': providers.WBProvider,
     'owncloud': providers.WBProvider,
@@ -134,6 +134,6 @@ if __name__ == '__main__':
 
     loop = loop = asyncio.get_event_loop()
     #futures = main(provider_names=args.providers, scenario_names=args.scenarios, delay=args.delay, use_wb=args.wb)
-    futures = main(provider_names=['googledrive'], scenario_names=['deleteme'], delay=0.01, use_wb=False)
+    futures = main(provider_names=['github'], scenario_names=['deleteme'], delay=0.01, use_wb=False)
     loop.run_until_complete(asyncio.gather(*futures))
     loop.close()

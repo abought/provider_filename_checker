@@ -1,4 +1,4 @@
-"""A provider that talks to DropBox"""
+"""A provider that talks to Google Drive"""
 import json
 import typing
 import urllib.parse

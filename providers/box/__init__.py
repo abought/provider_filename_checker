@@ -1,4 +1,4 @@
-"""A provider that talks to DropBox"""
+"""A provider that talks to Box"""
 import json
 import typing
 import urllib.parse
@@ -7,6 +7,7 @@ import aiohttp
 
 from ..base import OauthBaseProvider
 import settings
+
 
 class BoxProvider(OauthBaseProvider):
     NAME = 'box'
