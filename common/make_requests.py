@@ -18,7 +18,7 @@ async def check_one_filename(provider: providers.BaseProvider,
     json, code = await provider.upload_file(fn, 'Any text will do')
     their_fn = provider.extract_uploaded_filename(json) if code < 400 else None
 
-    is_match = None
+    is_match = False
     for match_type, method in behaviors.COMPARISONS.items():
         if their_fn and method(fn, their_fn):
             is_match = match_type

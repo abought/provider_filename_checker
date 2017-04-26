@@ -1,5 +1,4 @@
 """A provider that talks to Owncloud"""
-import json
 import os
 import typing
 import urllib.parse
@@ -28,50 +27,26 @@ class OwncloudProvider(BasicAuthProvider):
         """Borrowed heavily from WB implementation"""
         parent_folder = self.parent_folder or ''
         # TODO: Might only work at top level
-        url = self._webdav_url + os.path.join(parent_folder, foldername)
+        url = self._webdav_url + os.path.join(urllib.parse.quote(parent_folder), urllib.parse.quote(foldername))
 
         resp, code = await self._make_request('MKCOL', url)
-
-        info = {'name': foldername, 'OC-FILEID': resp.headers.get('OC-FILEID')}
-        return info, code
+        # FIXME: Owncloud response contains an OC-FILEID, but no foldername confirmation. So just assume.
+        return foldername, code
 
     async def upload_file(self,
                           filename: str,
                           content) -> typing.Tuple[dict, int]:
         """
-        See https://developers.google.com/drive/v2/web/multipart-upload
-        (use multipart for simple, non-resumable uploads with metadata)
+        See https://doc.owncloud.org/server/7.0/user_manual/files/files.html#accessing-files-using-curl
         """
-        # parent_folder = self.parent_folder or 'root'
-        # # Upload files to a different host than the api base url
-        # url = self.BASE_CONTENT_URL
-        #
-        # size = len(content.encode('utf-8'))
-        # params = {
-        #     'uploadType': 'multipart'
-        # }
-        # headers = {
-        #     'Content-Type': 'text/plain',
-        #     'Content-Length': str(size)
-        # }
-        #
-        # # Construct multipart payload
-        # with aiohttp.MultipartWriter('related') as mpwriter:
-        #     mpwriter.append_json(
-        #         {
-        #             'title': filename,
-        #             'parents': [{
-        #                 'kind': 'drive#parentReference',
-        #                 'id': parent_folder
-        #             }]
-        #         },
-        #         headers={'charset': 'UTF-8'}
-        #     )
-        #     mpwriter.append(content, headers={'Content-Type': 'text/plain'})
-        #     return await self._make_request('POST', url, data=mpwriter, params=params, headers=headers)
+        parent_folder = self.parent_folder or ''
+        # TODO: might only work for top-level folders
+        url = self._webdav_url + os.path.join(urllib.parse.quote(parent_folder), urllib.parse.quote(filename))
+        return await self._make_request('PUT', url, data=content)
 
     @staticmethod
-    def extract_uploaded_filename(payload: dict = None):
+    def extract_uploaded_filename(payload= None):
+        # FIXME: In order to use this feature we will need a future, separate PROPFIND request for metadata; see WB
         pass
-        # TODO: Implement
-        # return payload['title']
+        return ''
+
