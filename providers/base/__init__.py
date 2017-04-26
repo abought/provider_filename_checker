@@ -17,7 +17,7 @@ class BaseProvider(abc.ABC):
     def __init__(self, *args, provider_name: str=None, **kwargs):
         self.provider_name = provider_name or self.NAME
         self.token = None
-        self.auth_headers = {}
+        self.auth_headers = {}  # TODO: Move to child class
 
         # Optionally, run *all* file operations within a specific folder (deliberately not general)
         self.parent_folder = None
@@ -25,14 +25,16 @@ class BaseProvider(abc.ABC):
     async def _make_request(self,
                             method,
                             url, *,
-                            params: dict=None,
+                            auth=None,
+                            data=None,
                             headers: dict=None,
-                            data=None) -> typing.Tuple[dict, int]:
+                            params: dict = None,
+                            as_json: bool=True) -> typing.Tuple[dict, int]:
 
         headers = headers or {}
-        headers.update(self.auth_headers)
+        headers.update(self.auth_headers)  # TODO: Move to child class
 
-        async with aiohttp.request(method, url, params=params, headers=headers, data=data) as resp:
+        async with aiohttp.request(method, url, auth=auth, data=data, headers=headers, params=params) as resp:
             code = resp.status
             print('Sending request to', url)
             print('Response status:', code, resp.reason)
@@ -40,7 +42,8 @@ class BaseProvider(abc.ABC):
             print('Response body: ', await resp.text())
             json = await resp.json()
 
-        return json, code
+        # Most providers provide the key info in resp json. In rare cases we will need the response object instead.
+        return json if as_json else resp, code
 
     @abc.abstractmethod
     async def authorize(self, *args, **kwargs):
@@ -73,3 +76,23 @@ class OauthBaseProvider(BaseProvider, abc.ABC):
         self.auth_headers = {
             'Authorization': 'Bearer {}'.format(self.token),
         }
+
+
+class BasicAuthProvider(BaseProvider, abc.ABC):
+    """
+    Authenticate via HTTP Basic Auth
+    """
+    USERNAME = None
+    PASSWORD = None
+
+    def __init__(self, *args, **kwargs):
+        super(BasicAuthProvider, self).__init__(*args, **kwargs)
+        self._auth = None
+
+    async def authorize(self, *args, username: str=None, password: str=None, **kwargs):
+        username = username or self.USERNAME
+        password = password or self.PASSWORD
+        self._auth = aiohttp.BasicAuth(username, password)
+
+    async def _make_request(self, *args, auth=None, **kwargs):
+        return await super(BasicAuthProvider, self)._make_request(*args, auth=self._auth, **kwargs)

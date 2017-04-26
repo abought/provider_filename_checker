@@ -70,5 +70,4 @@ class GoogleDriveProvider(OauthBaseProvider):
 
     @staticmethod
     def extract_uploaded_filename(payload: dict = None):
-        # TODO: Implement
         return payload['title']

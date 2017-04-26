@@ -14,6 +14,11 @@ GITHUB_AUTH_TOKEN = None  # https://github.com/settings/tokens
 BOX_OAUTH_TOKEN = None  # 1 hr, get token from app config page https://app.box.com/developers/services/edit/<app_id>
 GOOGLEDRIVE_OAUTH_TOKEN = None  #  1hr, Get from https://developers.google.com/oauthplayground/ , Scope /auth/drive
 
+# Owncloud apparently doesn't support oauth, which is fun
+#  https://doc.owncloud.org/server/latest/developer_manual/core/externalapi.html#authentication-basics
+OWNCLOUD_USERNAME = None
+OWNCLOUD_APP_PASSWORD = None  # From https://<host>/settings/personal
+OWNCLOUD_URL = None
 
 ####
 #  MISC info required for providers to work
