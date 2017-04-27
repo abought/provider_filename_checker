@@ -38,8 +38,9 @@ class S3Provider(NoAuthProvider):
 
         url = self.bucket.new_key(path).generate_url(60, 'PUT')
 
-        resp, code = await self._make_request('PUT', url, skip_auto_headers=['CONTENT-TYPE'])
-        return resp['id'], code
+        resp, code = await self._make_request('PUT', url, skip_auto_headers=['CONTENT-TYPE'], as_json=False)
+        # TODO: May need separate metadata fetch for file content info??
+        return foldername, code
 
     async def upload_file(self,
                           filename: str,
@@ -47,37 +48,22 @@ class S3Provider(NoAuthProvider):
         """
         See 
         """
-        #TODO : Implement
-        # parent_folder = self.parent_folder or 'root'
-        # # Upload files to a different host than the api base url
-        # url = self.BASE_CONTENT_URL
-        #
-        # size = len(content.encode('utf-8'))
-        # params = {
-        #     'uploadType': 'multipart'
-        # }
-        # headers = {
-        #     'Content-Type': 'text/plain',
-        #     'Content-Length': str(size)
-        # }
-        #
-        # # Construct multipart payload
-        # with aiohttp.MultipartWriter('related') as mpwriter:
-        #     mpwriter.append_json(
-        #         {
-        #             'title': filename,
-        #             'parents': [{
-        #                 'kind': 'drive#parentReference',
-        #                 'id': parent_folder
-        #             }]
-        #         },
-        #         headers={'charset': 'UTF-8'}
-        #     )
-        #     mpwriter.append(content, headers={'Content-Type': 'text/plain'})
-        #     return await self._make_request('POST', url, data=mpwriter, params=params, headers=headers)
+        # TODO: May only work for top level folders
+        parent_folder = self.parent_folder or ''
+        # TODO/ FIXME: This gets appended to the URL and  might need to be encoded?
+        path = os.path.join(parent_folder, filename)
+
+        # TODO: Don't encrypt uploads for now, but this may change
+        headers = {'Content-Length': str(len(content.encode('utf-8')))}
+        url = self.bucket.new_key(path).generate_url(60, 'PUT', headers=headers)
+
+        # FIXME: May need a separate mmetadata request to get the actual filename
+        return await self._make_request('PUT', url,
+                                        data=content, headers=headers,
+                                        skip_auto_headers={'CONTENT-TYPE'}, as_json=False)
 
     @staticmethod
     def extract_uploaded_filename(payload: dict = None):
-        # TODO: Implement
+        # FIXME: Implement, needing separate metadata request
         pass
         # return payload['title']
