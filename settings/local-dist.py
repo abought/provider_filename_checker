@@ -10,6 +10,9 @@ WATERBUTLER_OSF_TOKEN = None
 DROPBOX_OAUTH_TOKEN = None
 GITHUB_AUTH_TOKEN = None  # https://github.com/settings/tokens
 
+S3_ACCESS_KEY = None
+S3_SECRET_KEY = None
+
 ### Personal access tokens that expire after x time
 BOX_OAUTH_TOKEN = None  # 1 hr, get token from app config page https://app.box.com/developers/services/edit/<app_id>
 GOOGLEDRIVE_OAUTH_TOKEN = None  #  1hr, Get from https://developers.google.com/oauthplayground/ , Scope /auth/drive
@@ -24,4 +27,7 @@ OWNCLOUD_URL = None
 #  MISC info required for providers to work
 ####
 # Github provider
-GH_REPO_NAME = 'abought/testing_repo'  # Of form <username/repo_name> as it appears in github urls. Must have `master` branch!
+GH_REPO_NAME = None  # Of form <username/repo_name> as it appears in github urls. Must have `master` branch!
+
+# S3 Provider
+S3_BUCKET = None

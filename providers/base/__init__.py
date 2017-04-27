@@ -29,12 +29,13 @@ class BaseProvider(abc.ABC):
                             data=None,
                             headers: dict=None,
                             params: dict = None,
-                            as_json: bool=True) -> typing.Tuple[dict, int]:
+                            as_json: bool=True,
+                            **kwargs) -> typing.Tuple[dict, int]:
 
         headers = headers or {}
         headers.update(self.auth_headers)  # TODO: Move to child class
 
-        async with aiohttp.request(method, url, auth=auth, data=data, headers=headers, params=params) as resp:
+        async with aiohttp.request(method, url, auth=auth, data=data, headers=headers, params=params, **kwargs) as resp:
             code = resp.status
             print('Sending request to', url)
             print('Response status:', code, resp.reason)
@@ -60,6 +61,12 @@ class BaseProvider(abc.ABC):
     @abc.abstractstaticmethod
     def extract_uploaded_filename(payload: dict=None):
         """Given the JSON payload from an upload response, extract the uploaded filename (if possible)"""
+        pass
+
+
+class NoAuthProvider(BaseProvider, abc.ABC):
+    """Provider that does not perform any global authorization (implementation must handle on each request)"""
+    async def authorize(self, *args, **kwargs):
         pass
 
 
