@@ -41,10 +41,11 @@ class BaseProvider(abc.ABC):
             print('Response status:', code, resp.reason)
             print('Response headers: ', resp.headers)
             print('Response body: ', await resp.text())
-            json = await resp.json()
+            # Most providers provide the key info in resp json. In rare cases we will need the response object instead
+            val = await resp.json() if as_json else resp
 
-        # Most providers provide the key info in resp json. In rare cases we will need the response object instead.
-        return json if as_json else resp, code
+
+        return val, code
 
     @abc.abstractmethod
     async def authorize(self, *args, **kwargs):

@@ -1,5 +1,6 @@
 """A provider that talks to Dataverse API 4.5"""
 import io
+import re
 import typing
 import xml.sax.saxutils as saxutils
 import zipfile
@@ -53,30 +54,44 @@ class DataverseProvider(NoAuthProvider):
         }
         resp, code = await self._make_request('POST', url, data=xml, headers=headers, auth=(self.DEFAULT_CREDENTIAL,))
 
-        # Dataverse does not return real filename in response
-        return foldername, code
+        # For uploading, we need the DOI of the resource, because THIS IS SPARTA
+        # Well. The XML format only gives links, so, we're not getting this out without a regex anyway
+        if code < 400:
+            match = re.search('(10.[a-zA-Z0-9\/]+)', await resp.text())
+            # Future dataset operations require the DOI (not the title or alias etc)
+            return match.group(), code
+        else:
+            return None, code
 
     async def upload_file(self,
                           filename: str,
                           content) -> typing.Tuple[dict, int]:
         """
         See http://guides.dataverse.org/en/4.5/api/sword.html#add-files-to-a-dataset-with-a-zip-file
+        
+        This script is focused on uploading files one at a time. In production use, zipfile upload could be handled 
+        more efficiently as a bulk request.
         """
-        # TODO: Implement
+        doi = self.parent_folder
 
         stream = io.BytesIO()
-        with zipfile.ZipFile(stream) as memzip:
+
+        with zipfile.ZipFile(stream, mode='w', compression=zipfile.ZIP_DEFLATED) as memzip:
             memzip.writestr(filename, content)
 
+        url = f'{self.BASE_URL}data-deposit/v1.1/swordv2/edit-media/study/doi:{doi}'
         size = len(stream.getvalue())
+        stream.seek(0, 0)
 
-        # headers = {'Content-Length': str(len(content.encode('utf-8')))}
-        # url = self.bucket.new_key(path).generate_url(60, 'PUT', headers=headers)
-        #
-        # # FIXME: May need a separate metadata request to get the actual filename
-        # return await self._make_request('PUT', url,
-        #                                 data=content, headers=headers,
-        #                                 skip_auto_headers={'CONTENT-TYPE'}, as_json=False)
+        headers = {
+            "Content-Disposition": "filename=temp.zip",
+            "Content-Type": "application/zip",
+            "Packaging": "http://purl.org/net/sword/package/SimpleZip",
+            "Content-Length": str(size),
+        }
+
+        return await self._make_request('POST', url, auth=(self.DEFAULT_CREDENTIAL,),
+                                        data=stream, headers=headers)
 
     @staticmethod
     def extract_uploaded_filename(payload: dict = None):

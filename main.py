@@ -91,6 +91,11 @@ async def pipeline(provider: providers.BaseProvider,
     # Create a folder where tests will be run
     dest_foldername = uuid.uuid4().hex
     folder_id, code = await provider.create_folder(dest_foldername)
+
+    if code >= 400:
+        print('Could not create parent folder for run of provider ', provider.provider_name)
+        sys.exit()
+
     print('Created folder ', folder_id, ' for provider ', provider.provider_name, code)
     # Some providers can choose to respect this setting for all requests, and do upload tests within this folder
     provider.parent_folder = folder_id
