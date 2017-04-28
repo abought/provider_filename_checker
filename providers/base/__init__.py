@@ -15,12 +15,12 @@ class BaseProvider(abc.ABC):
     NAME = None
 
     def __init__(self, *args, provider_name: str=None, **kwargs):
-        self.provider_name = provider_name or self.NAME
-        self.token = None
-        self.auth_headers = {}  # TODO: Move to child class
+        self.provider_name: str = provider_name or self.NAME
+        self.token: str = None
+        self.auth_headers : dict = {}  # TODO: Move to child class
 
         # Optionally, run *all* file operations within a specific folder (deliberately not general)
-        self.parent_folder = None
+        self.parent_folder : str = None
 
     async def _make_request(self,
                             method,
@@ -30,7 +30,8 @@ class BaseProvider(abc.ABC):
                             headers: dict=None,
                             params: dict = None,
                             as_json: bool=True,
-                            **kwargs) -> typing.Tuple[dict, int]:
+                            **kwargs) -> typing.Tuple[typing.Union[object, dict],
+                                                      int]:
 
         headers = headers or {}
         headers.update(self.auth_headers)  # TODO: Move to child class
@@ -44,19 +45,18 @@ class BaseProvider(abc.ABC):
             # Most providers provide the key info in resp json. In rare cases we will need the response object instead
             val = await resp.json() if as_json else resp
 
-
         return val, code
 
     @abc.abstractmethod
-    async def authorize(self, *args, **kwargs):
+    async def authorize(self, *args, **kwargs) -> None:
         pass
 
     @abc.abstractmethod
-    async def create_folder(self, foldername: str):
+    async def create_folder(self, foldername: str) -> typing.Tuple[str, int]:
         pass
 
     @abc.abstractmethod
-    async def upload_file(self, filename: str, content):
+    async def upload_file(self, filename: str, content) -> typing.Tuple[typing.Union[dict, object],int]:
         pass
 
     @abc.abstractstaticmethod

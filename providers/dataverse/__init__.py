@@ -72,7 +72,7 @@ class DataverseProvider(NoAuthProvider):
         This script is focused on uploading files one at a time. In production use, zipfile upload could be handled 
         more efficiently as a bulk request.
         """
-        doi = self.parent_folder
+        doi = self.parent_folder  # Every file we upload needs a dataset specified in advance!
 
         stream = io.BytesIO()
 
