@@ -1,8 +1,6 @@
 """A provider that talks to Amazon S3"""
-import json
 import os
 import typing
-import urllib.parse
 
 from boto.s3.connection import S3Connection
 from boto.s3.connection import OrdinaryCallingFormat
@@ -57,7 +55,7 @@ class S3Provider(NoAuthProvider):
         headers = {'Content-Length': str(len(content.encode('utf-8')))}
         url = self.bucket.new_key(path).generate_url(60, 'PUT', headers=headers)
 
-        # FIXME: May need a separate mmetadata request to get the actual filename
+        # FIXME: May need a separate metadata request to get the actual filename
         return await self._make_request('PUT', url,
                                         data=content, headers=headers,
                                         skip_auto_headers={'CONTENT-TYPE'}, as_json=False)

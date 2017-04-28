@@ -13,6 +13,8 @@ GITHUB_AUTH_TOKEN = None  # https://github.com/settings/tokens
 S3_ACCESS_KEY = None
 S3_SECRET_KEY = None
 
+DATAVERSE_API_TOKEN = None
+
 ### Personal access tokens that expire after x time
 BOX_OAUTH_TOKEN = None  # 1 hr, get token from app config page https://app.box.com/developers/services/edit/<app_id>
 GOOGLEDRIVE_OAUTH_TOKEN = None  #  1hr, Get from https://developers.google.com/oauthplayground/ , Scope /auth/drive
@@ -31,3 +33,6 @@ GH_REPO_NAME = None  # Of form <username/repo_name> as it appears in github urls
 
 # S3 Provider
 S3_BUCKET = None
+
+# Dataverse: alias id of dataverse we want to connect to (where we will be depositing the data)
+DATAVERSE_NAME = None

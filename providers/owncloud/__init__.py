@@ -20,7 +20,7 @@ class OwncloudProvider(BasicAuthProvider):
     def _webdav_url(self):
         return urllib.parse.urljoin(self.BASE_URL, 'remote.php/webdav/')
 
-    async def _make_request(self, *args, auth=None, **kwargs):
+    async def _make_request(self, *args, **kwargs):
         return await super(OwncloudProvider, self)._make_request(*args, as_json=False, **kwargs)
 
     async def create_folder(self, foldername: str):
