@@ -7,3 +7,4 @@
 "UPPER CASE FILENAME","FILENAME.TXT"
 "lowercase filename","filename.txt"
 "Mixed Case Filename","fIlEnAmE.txt"
+"Contains HTML","filename containing <img src=onerror=""alert('Hello world')""> html"

@@ -38,10 +38,10 @@ class BaseProvider(abc.ABC):
 
         async with aiohttp.request(method, url, auth=auth, data=data, headers=headers, params=params, **kwargs) as resp:
             code = resp.status
-            print('Sending request to', url)
-            print('Response status:', code, resp.reason)
-            print('Response headers: ', resp.headers)
-            print('Response body: ', await resp.text())
+            print('Sending request to', url, '\n')
+            print('Response status:', code, resp.reason, '\n')
+            print('Response headers: ', resp.headers, '\n')
+            print('Response body: ', await resp.text(), '\n\n\n')
             # Most providers provide the key info in resp json. In rare cases we will need the response object instead
             val = await resp.json() if as_json else resp
 

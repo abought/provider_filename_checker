@@ -49,7 +49,7 @@ class FigshareProvider(NoAuthProvider):
         }
         placeholder_url = f'{self.BASE_URL}account/articles/{parent_dataset}/files'
         payload, code = await self._make_request('POST', placeholder_url, data=json.dumps(payload))
-        return payload['location'].rsplit('/', 1)[1], code
+        return payload, code
 
     async def _get_file_upload_url(self, article_id, file_id):
         """
@@ -68,7 +68,7 @@ class FigshareProvider(NoAuthProvider):
         parts_resp_payload, code = await self._make_request('GET', upload_url)
         parts = parts_resp_payload['parts']
 
-        return upload_url, parts
+        return payload, upload_url, parts
 
     async def _perform_upload(self, content, upload_url, parts):
         """Second upload step: send data
@@ -89,7 +89,7 @@ class FigshareProvider(NoAuthProvider):
         # Just return the last response info, or a "failure-esque" placeholder
         return upload_response, code
 
-    async def _mark_upload_complete(self, article_id, file_id):
+    async def _mark_upload_complete(self, article_id: str, file_id: str):
         """Last upload step: tell figshare you're done"""
         url = f'{self.BASE_URL}account/articles/{article_id}/files/{file_id}'
         # TODO: This should return a 202 code
@@ -110,21 +110,22 @@ class FigshareProvider(NoAuthProvider):
         # 4. Make the upload complete
         parent_dataset = self.parent_folder or settings.FIGSHARE_PROJECT
         size = len(content.encode('utf-8'))
-        new_file_id, code = await self._initiate_upload(parent_dataset, filename, size)
+        initiate_payload, code = await self._initiate_upload(parent_dataset, filename, size)
+        new_file_id = initiate_payload['location'].rsplit('/', 1)[1]
 
         if code >= 400:
             return {}, code
 
-        upload_url, parts = await self._get_file_upload_url(parent_dataset, new_file_id)
+        metadata_payload, upload_url, parts = await self._get_file_upload_url(parent_dataset, new_file_id)
+
         # TODO: Upload response?
         upload_resp, code = await self._perform_upload(content, upload_url, parts)
 
-        return await self._mark_upload_complete(parent_dataset, new_file_id)
-
-
+        # We return the code for the last request attempted as final status... but the filename payload is from a
+        #   different request, b/c Figshare API is very fragmented. Admittedly this is clunky.
+        _, code = await self._mark_upload_complete(parent_dataset, new_file_id)
+        return metadata_payload, code
 
     @staticmethod
     def extract_uploaded_filename(payload: dict = None):
-        # TODO: Implement
-        pass
-        # return payload['title']
+        return payload['name']
