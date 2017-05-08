@@ -16,6 +16,8 @@ class DataverseProvider(NoAuthProvider):
     DEFAULT_CREDENTIAL = settings.DATAVERSE_API_TOKEN
     BASE_URL = 'https://demo.dataverse.org/dvn/api/'
 
+    ALLOWS_SUBFOLDERS = False
+
     def _dataset_xml(self, datasetname: str) -> str:
         """Generate minimum xml file required to create a new dataset"""
         # TODO: Never do this in production code

@@ -16,6 +16,10 @@ class WBProvider(OauthBaseProvider):
     BASE_URL = settings.WB_HOST
     DEFAULT_CREDENTIAL = settings.WATERBUTLER_OSF_TOKEN
 
+    # True of osfstorage, but less so if using WB to talk to other providers. We allow the attempt and defer to
+    #   WB's abstraction
+    ALLOWS_SUBFOLDERS = True
+
     async def create_folder(self, foldername: str) -> typing.Tuple[str, int]:
         """Create a folder on that provider, & return the remote name/ id of the parent (to be used in future calls)"""
 

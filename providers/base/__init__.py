@@ -14,13 +14,16 @@ class BaseProvider(abc.ABC):
     # Default provider name (though we prefer users to pass it in separately)
     NAME = None
 
+    # Whether the provider allows subfolders below the top level. Some, like Figshare, organize things differently.
+    ALLOWS_SUBFOLDERS: bool = True
+
     def __init__(self, *args, provider_name: str=None, **kwargs):
         self.provider_name: str = provider_name or self.NAME
         self.token: str = None
-        self.auth_headers : dict = {}  # TODO: Move to child class
+        self.auth_headers: dict = {}  # TODO: Move to child class
 
         # Optionally, run *all* file operations within a specific folder (deliberately not general)
-        self.parent_folder : str = None
+        self.parent_folder: str = None
 
     async def _make_request(self,
                             method,
@@ -38,10 +41,12 @@ class BaseProvider(abc.ABC):
 
         async with aiohttp.request(method, url, auth=auth, data=data, headers=headers, params=params, **kwargs) as resp:
             code = resp.status
-            print('Sending request to', url, '\n')
-            print('Response status:', code, resp.reason, '\n')
-            print('Response headers: ', resp.headers, '\n')
-            print('Response body: ', await resp.text(), '\n\n\n')
+
+            # print('Sending request to', url, '\n')
+            # print('Response status:', code, resp.reason, '\n')
+            # print('Response headers: ', resp.headers, '\n')
+            # print('Response body: ', await resp.text(), '\n\n\n')
+
             # Most providers provide the key info in resp json. In rare cases we will need the response object instead
             val = await resp.json() if as_json else resp
 

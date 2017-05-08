@@ -13,6 +13,8 @@ class DropboxProvider(OauthBaseProvider):
     BASE_URL = 'https://api.dropboxapi.com/2/files/'
     BASE_CONTENT_URL = 'https://content.dropboxapi.com/2/files/'
 
+    ALLOWS_SUBFOLDERS = True
+
     async def create_folder(self, foldername: str):
         parent_folder = self.parent_folder or '/'
         url = urllib.parse.urljoin(self.BASE_URL, 'create_folder')

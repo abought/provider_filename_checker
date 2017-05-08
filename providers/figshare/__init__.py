@@ -13,6 +13,8 @@ class FigshareProvider(NoAuthProvider):
     BASE_URL = 'https://api.figshare.com/v2/'
     BASE_CONTENT_URL = None
 
+    ALLOWS_SUBFOLDERS = False
+
     async def authorize(self, *args, token: str = None, **kwargs):
         """Set authorization headers, optionally using default credentials if none are explicitly passed"""
         self.token = token or self.DEFAULT_CREDENTIAL

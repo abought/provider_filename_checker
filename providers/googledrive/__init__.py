@@ -16,6 +16,8 @@ class GoogleDriveProvider(OauthBaseProvider):
     BASE_URL = 'https://www.googleapis.com/drive/v2/'  # TODO: v3 exists but wb uses v2
     BASE_CONTENT_URL = 'https://www.googleapis.com/upload/drive/v2/files'
 
+    ALLOWS_SUBFOLDERS = True
+
     async def create_folder(self, foldername: str):
         """See https://developers.google.com/drive/v3/web/folder"""
         parent_folder = self.parent_folder or 'root'

@@ -16,6 +16,8 @@ class BoxProvider(OauthBaseProvider):
     BASE_URL = 'https://api.box.com/2.0/'
     BASE_CONTENT_URL = 'https://upload.box.com/api/2.0/files/'
 
+    ALLOWS_SUBFOLDERS = True
+
     async def create_folder(self, foldername: str):
         """
         See: https://docs.box.com/reference#create-a-new-folder

@@ -16,6 +16,8 @@ class OwncloudProvider(BasicAuthProvider):
     BASE_URL = settings.OWNCLOUD_URL
     BASE_CONTENT_URL = None
 
+    ALLOWS_SUBFOLDERS = True
+
     @property
     def _webdav_url(self):
         return urllib.parse.urljoin(self.BASE_URL, 'remote.php/webdav/')

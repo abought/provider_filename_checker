@@ -34,6 +34,7 @@
 "UPPER CASE FILENAME","FILENAME.TXT","FILENAME.TXT","200","exact"
 "lowercase filename","filename.txt","filename.txt","200","exact"
 "Mixed Case Filename","fIlEnAmE.txt","fIlEnAmE.txt","200","exact"
+"Contains HTML","filename containing <img src=onerror=""alert('Hello world')""> html","filename containing <img src=onerror=""alert('Hello world')""> html","200","exact"
 "a sequence containing # at position 0","#filename.txt","#filename.txt","200","exact"
 "a sequence containing % at position 0","%filename.txt","%filename.txt","200","exact"
 "a sequence containing ? at position 0","?filename.txt","?filename.txt","200","exact"
@@ -178,3 +179,7 @@ name.txt","200","exact"
  at position -1","filename.txt
 ","filename.txt
 ","200","exact"
+"Create a folder, then a file with same name (folder)","folderthenfile","0BxGwKGgJtw4Wa2daLTN0bW1IRkU","200",""
+"Create a folder, then a file with same name (file)","folderthenfile","folderthenfile","200","exact"
+"Create a file, then a folder with same name (file)","filethenfolder","filethenfolder","200","exact"
+"Create a file, then a folder with same name (folder)","filethenfolder","0BxGwKGgJtw4WaERDRThYQjZVMFU","200",""

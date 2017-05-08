@@ -13,9 +13,10 @@ This repository provides very limited multi-storage-provider abstractions, but i
 edge cases or a broad range of functionality. Do not use this code in production environments.
 
 ## TODO
+- [x] Allow querying all providers via Waterbutler
 - [~] Per provider abstractions without going through Waterbutler
-- [ ] Support checking folder vs filename rules (currently not possible via tests- maybe a third "scenario csv" column is in order?)
-  - Check in different order (create folder, then file with same name- or vice versa)
+- [x] Support checking folder + filename in same folder
+  - [x] Requirement: annotate which providers totally disallow subfolders 
 - [ ] Fix box provider (unhelpful 400 errors)
 - Add "get metadata" feature to verify uploaded filenames for certain providers
   - [ ] Fix owncloud to return provider metadata

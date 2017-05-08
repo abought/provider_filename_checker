@@ -19,6 +19,11 @@ class S3Provider(NoAuthProvider):
     BASE_URL = None
     BASE_CONTENT_URL = None
 
+    # Pseudo/ abstraction layer. See http://docs.aws.amazon.com/AmazonS3/latest/UG/FolderOperations.html
+    #  "The Amazon S3 console treats all objects that have a forward slash "/" character as the last (trailing)
+    #   character in the key name as a folder, for example examplekeyname/."
+    ALLOWS_SUBFOLDERS = True
+
     def __init__(self, *args, **kwargs):
         self.connection = S3Connection(self.S3_ACCESS_KEY,
                                        self.S3_SECRET_KEY,

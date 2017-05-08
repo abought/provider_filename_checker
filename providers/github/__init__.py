@@ -16,6 +16,9 @@ class GithubProvider(OauthBaseProvider):
     BASE_URL = 'https://api.github.com/'
     BASE_CONTENT_URL = None
 
+    # Pseudo folders via gitkeep
+    ALLOWS_SUBFOLDERS = True
+
     async def create_folder(self, foldername: str):
         """
         Create an empty gitkeep file at the specified path
