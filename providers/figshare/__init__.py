@@ -40,6 +40,63 @@ class FigshareProvider(NoAuthProvider):
         article_id = resp['location'].rsplit('/', 1)[1]
         return article_id, code
 
+    async def _initiate_upload(self, parent_dataset, filename, size):
+        """First upload step: tell figshare an upload will happen and reserve a place"""
+        # First upload placeholder file
+        payload = {
+            'name': filename,
+            'size': str(size)
+        }
+        placeholder_url = f'{self.BASE_URL}account/articles/{parent_dataset}/files'
+        payload, code = await self._make_request('POST', placeholder_url, data=json.dumps(payload))
+        return payload['location'].rsplit('/', 1)[1], code
+
+    async def _get_file_upload_url(self, article_id, file_id):
+        """
+        After initiating upload, we need to ask for figshare's upload rules in a separate request
+        I have been assured that this is real and not some sort of a weird joke.
+        
+        Then after we get the upload url, we need to play Figshare may I to be told how to upload
+        
+        I continue to be told all this is not a weird joke.
+        """
+
+        url = f'{self.BASE_URL}account/articles/{article_id}/files/{file_id}'
+        payload, code = await self._make_request('GET', url)
+
+        upload_url = payload['upload_url']
+        parts_resp_payload, code = await self._make_request('GET', upload_url)
+        parts = parts_resp_payload['parts']
+
+        return upload_url, parts
+
+    async def _perform_upload(self, content, upload_url, parts):
+        """Second upload step: send data
+        This very simple testcase gleefully ignores `parts` information because the chunk we send is so small
+        """
+        upload_response = None
+        code = 400 # If nothing gets uploaded, don't consider this a success
+        for part in parts:
+            # size = part['endOffset'] - part['startOffset'] + 1  # Ignoring this!
+            part_number = part['partNo']
+            upload_response, code = await self._make_request(
+                'PUT',
+                upload_url + '/' + str(part_number),
+                data=content,
+                # For some reason the file upload endpoints just return the string "ok" instead of a payload
+                as_json=False
+            )
+        # Just return the last response info, or a "failure-esque" placeholder
+        return upload_response, code
+
+    async def _mark_upload_complete(self, article_id, file_id):
+        """Last upload step: tell figshare you're done"""
+        url = f'{self.BASE_URL}account/articles/{article_id}/files/{file_id}'
+        # TODO: This should return a 202 code
+        return await self._make_request('POST', url,
+                                        # The success response contains XML, not JSON
+                                        as_json=False)
+
     async def upload_file(self,
                           filename: str,
                           content) -> typing.Tuple[dict, int]:
@@ -47,34 +104,24 @@ class FigshareProvider(NoAuthProvider):
         See https://docs.figshare.com/api/file_uploader/#figshare-upload-service
         https://docs.figshare.com/api/upload_example/
         """
-        pass
-        # parent_folder = self.parent_folder or 'root'
-        # # Upload files to a different host than the api base url
-        # url = self.BASE_CONTENT_URL
-        #
-        # size = len(content.encode('utf-8'))
-        # params = {
-        #     'uploadType': 'multipart'
-        # }
-        # headers = {
-        #     'Content-Type': 'text/plain',
-        #     'Content-Length': str(size)
-        # }
-        #
-        # # Construct multipart payload
-        # with aiohttp.MultipartWriter('related') as mpwriter:
-        #     mpwriter.append_json(
-        #         {
-        #             'title': filename,
-        #             'parents': [{
-        #                 'kind': 'drive#parentReference',
-        #                 'id': parent_folder
-        #             }]
-        #         },
-        #         headers={'charset': 'UTF-8'}
-        #     )
-        #     mpwriter.append(content, headers={'Content-Type': 'text/plain'})
-        #     return await self._make_request('POST', url, data=mpwriter, params=params, headers=headers)
+        # 1. Initiate (tell figshare to expect a file)
+        # 2. Get upload url (and then a list of how figshare wants the file broken up)
+        # 3. Upload the content, 1+ requests
+        # 4. Make the upload complete
+        parent_dataset = self.parent_folder or settings.FIGSHARE_PROJECT
+        size = len(content.encode('utf-8'))
+        new_file_id, code = await self._initiate_upload(parent_dataset, filename, size)
+
+        if code >= 400:
+            return {}, code
+
+        upload_url, parts = await self._get_file_upload_url(parent_dataset, new_file_id)
+        # TODO: Upload response?
+        upload_resp, code = await self._perform_upload(content, upload_url, parts)
+
+        return await self._mark_upload_complete(parent_dataset, new_file_id)
+
+
 
     @staticmethod
     def extract_uploaded_filename(payload: dict = None):
