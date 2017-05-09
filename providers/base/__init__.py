@@ -45,7 +45,7 @@ class BaseProvider(abc.ABC):
             print('Response headers: ', resp.headers, '\n')
             print('Response body: ', await resp.text(), '\n\n\n')
 
-            return resp, code
+        return resp, code
 
     async def make_request_get_json(self, *args, **kwargs) \
             -> typing.Tuple[typing.Union[aiohttp.client.ClientResponse, dict], int]:

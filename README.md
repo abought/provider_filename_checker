@@ -22,3 +22,28 @@ edge cases or a broad range of functionality. Do not use this code in production
   - [ ] Fix owncloud to return provider metadata
   - [ ] Evaluate Amazon s3 metadata + other notes
   - [ ] Dataverse
+
+## Reporting
+### Provider worklist
+- [ ] Box
+  - [ ] Via WB
+- [ ] Dataverse
+  - [ ] Via WB
+- [x] Dropbox
+  - [ ] Via WB
+- [ ] Figshare
+  - [ ] Via WB
+- [ ] Github
+  - [ ] Via WB
+- [ ] Google Drive
+  - [ ] Via WB
+- [ ] OSFStorage (only uses waterbutler)
+- [ ] OwnCloud
+  - [ ] Via WB
+- [ ] S3
+  - [ ] Via WB
+
+
+### Comparison worklist
+- [ ] Write a script that compares the "via waterbutler" results to the "pure API" results; consolidate reports
+- [ ] Update internal wiki on provider information

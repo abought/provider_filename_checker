@@ -16,11 +16,11 @@ class DropboxProvider(OauthBaseProvider):
     ALLOWS_SUBFOLDERS = True
 
     async def create_folder(self, foldername: str):
-        parent_folder = self.parent_folder or '/'
+        parent_folder = self.parent_folder or ''
         url = urllib.parse.urljoin(self.BASE_URL, 'create_folder')
 
         data = {
-            'path': f'{parent_folder}{foldername}'
+            'path': f'{parent_folder}/{foldername}'
         }
         resp, code = await self.make_request_get_json('POST', url,
                                                       data=json.dumps(data),
@@ -31,6 +31,7 @@ class DropboxProvider(OauthBaseProvider):
     async def upload_file(self,
                           filename: str,
                           content) -> typing.Tuple[dict, int]:
+        """See https://www.dropbox.com/developers/documentation/http/documentation#files-upload"""
 
         # If a parent folder is specified, append it to the URL. Otherwise just add a trailing slash.
         parent_folder = self.parent_folder or ''
