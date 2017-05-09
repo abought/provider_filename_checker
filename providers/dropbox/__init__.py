@@ -22,10 +22,11 @@ class DropboxProvider(OauthBaseProvider):
         data = {
             'path': f'{parent_folder}{foldername}'
         }
-        resp, code = await self._make_request('POST', url,
-                                              data=json.dumps(data),
-                                              headers={'Content-Type': 'application/json'})
-        return resp['path_display'], code
+        resp, code = await self.make_request_get_json('POST', url,
+                                                      data=json.dumps(data),
+                                                      headers={'Content-Type': 'application/json'})
+        rv = resp['path_display'] if code < 400 else None
+        return rv, code
 
     async def upload_file(self,
                           filename: str,
@@ -44,7 +45,7 @@ class DropboxProvider(OauthBaseProvider):
             ),
             'Content-Length': str(size),
         }
-        return await self._make_request('POST', url, headers=headers, data=content)
+        return await self.make_request_get_json('POST', url, headers=headers, data=content)
 
     @staticmethod
     def extract_uploaded_filename(payload: dict=None):

@@ -41,13 +41,11 @@ class S3Provider(NoAuthProvider):
 
         url = self.bucket.new_key(path).generate_url(60, 'PUT')
 
-        resp, code = await self._make_request('PUT', url, skip_auto_headers=['CONTENT-TYPE'], as_json=False)
+        resp, code = await self._make_request('PUT', url, skip_auto_headers=['CONTENT-TYPE'])
         # TODO: May need separate metadata fetch for file content info??
         return foldername, code
 
-    async def upload_file(self,
-                          filename: str,
-                          content) -> typing.Tuple[dict, int]:
+    async def upload_file(self, filename: str, content):
         """
         See 
         """
@@ -63,7 +61,7 @@ class S3Provider(NoAuthProvider):
         # FIXME: May need a separate metadata request to get the actual filename
         return await self._make_request('PUT', url,
                                         data=content, headers=headers,
-                                        skip_auto_headers={'CONTENT-TYPE'}, as_json=False)
+                                        skip_auto_headers={'CONTENT-TYPE'})
 
     @staticmethod
     def extract_uploaded_filename(payload: dict = None):

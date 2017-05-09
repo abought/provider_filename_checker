@@ -33,10 +33,11 @@ class BoxProvider(OauthBaseProvider):
                 'id': parent_folder
             }
         }
-        resp, code = await self._make_request('POST', url,
-                                              data=json.dumps(data),
-                                              headers={'Content-Type': 'application/json'})
-        return resp['id'], code
+        resp, code = await self.make_request_get_json('POST', url,
+                                                      data=json.dumps(data),
+                                                      headers={'Content-Type': 'application/json'})
+        rv = resp['id'] if code < 400 else None
+        return rv, code
 
     async def upload_file(self,
                           filename: str,
@@ -65,14 +66,14 @@ class BoxProvider(OauthBaseProvider):
                 aiohttp.hdrs.CONTENT_DISPOSITION: 'form-data; name="file"'
             })
 
-            # TODO: Resume tracing this. Some possible differences involving headers, content length (parts vs whole?)
+            # FIXME: Box provider fails. Resume tracing this. Some possible differences involving headers, content length (parts vs whole?)
             for part in mpwriter:
                 part.headers.pop(aiohttp.hdrs.CONTENT_LENGTH, None)
 
             for l in mpwriter.serialize():
                 print(l.decode('utf-8'))
 
-            return await self._make_request('POST', url, data=mpwriter)
+            return await self.make_request_get_json('POST', url, data=mpwriter)
 
     @staticmethod
     def extract_uploaded_filename(payload: dict=None):

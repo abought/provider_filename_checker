@@ -72,9 +72,9 @@ class GithubProvider(OauthBaseProvider):
         path_encoded = urllib.parse.quote(filename)
         url = f'{self.BASE_URL}repos/{settings.GH_REPO_NAME}/contents/{path_encoded}'
 
-        return await self._make_request('PUT', url,
-                                        data=json.dumps(data),
-                                        headers={'Content-Type': 'application/json'})
+        return await self.make_request_get_json('PUT', url,
+                                                data=json.dumps(data),
+                                                headers={'Content-Type': 'application/json'})
 
     @staticmethod
     def extract_uploaded_filename(payload: dict=None):

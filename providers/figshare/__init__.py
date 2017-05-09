@@ -2,11 +2,11 @@
 import json
 import typing
 
-from ..base import NoAuthProvider
+from ..base import BaseProvider
 import settings
 
 
-class FigshareProvider(NoAuthProvider):
+class FigshareProvider(BaseProvider):
     NAME = 'figshare'
 
     DEFAULT_CREDENTIAL = settings.FIGSHARE_API_TOKEN
@@ -33,13 +33,13 @@ class FigshareProvider(NoAuthProvider):
             'defined_type': 'fileset'
         }
 
-        resp, code = await self._make_request(
+        resp, code = await self.make_request_get_json(
             'POST',
             url,
             data=json.dumps(data)
         )
 
-        article_id = resp['location'].rsplit('/', 1)[1]
+        article_id = resp['location'].rsplit('/', 1)[1] if code < 400 else resp
         return article_id, code
 
     async def _initiate_upload(self, parent_dataset, filename, size):
@@ -50,7 +50,7 @@ class FigshareProvider(NoAuthProvider):
             'size': str(size)
         }
         placeholder_url = f'{self.BASE_URL}account/articles/{parent_dataset}/files'
-        payload, code = await self._make_request('POST', placeholder_url, data=json.dumps(payload))
+        payload, code = await self.make_request_get_json('POST', placeholder_url, data=json.dumps(payload))
         return payload, code
 
     async def _get_file_upload_url(self, article_id, file_id):
@@ -64,29 +64,31 @@ class FigshareProvider(NoAuthProvider):
         """
 
         url = f'{self.BASE_URL}account/articles/{article_id}/files/{file_id}'
-        payload, code = await self._make_request('GET', url)
+        payload, url_code = await self.make_request_get_json('GET', url)
 
-        upload_url = payload['upload_url']
-        parts_resp_payload, code = await self._make_request('GET', upload_url)
-        parts = parts_resp_payload['parts']
+        upload_url = None
+        parts = None
+        if url_code < 400:
+            upload_url = payload['upload_url']
+            parts_resp_payload, parts_code = await self.make_request_get_json('GET', upload_url)
+
+            parts = parts_resp_payload['parts'] if parts_code < 400 else parts_resp_payload
 
         return payload, upload_url, parts
 
     async def _perform_upload(self, content, upload_url, parts):
         """Second upload step: send data
-        This very simple testcase gleefully ignores `parts` information because the chunk we send is so small
+        Interestingly, these endpoints just return "OK" for each upload step req body. Pretty uninformative.
         """
         upload_response = None
         code = 400 # If nothing gets uploaded, don't consider this a success
         for part in parts:
-            # size = part['endOffset'] - part['startOffset'] + 1  # Ignoring this!
+            # size = part['endOffset'] - part['startOffset'] + 1  # We choose to ignore this for the limited testcase!
             part_number = part['partNo']
             upload_response, code = await self._make_request(
                 'PUT',
                 upload_url + '/' + str(part_number),
-                data=content,
-                # For some reason the file upload endpoints just return the string "ok" instead of a payload
-                as_json=False
+                data=content
             )
         # Just return the last response info, or a "failure-esque" placeholder
         return upload_response, code
@@ -94,10 +96,9 @@ class FigshareProvider(NoAuthProvider):
     async def _mark_upload_complete(self, article_id: str, file_id: str):
         """Last upload step: tell figshare you're done"""
         url = f'{self.BASE_URL}account/articles/{article_id}/files/{file_id}'
-        # TODO: This should return a 202 code
-        return await self._make_request('POST', url,
-                                        # The success response contains XML, not JSON
-                                        as_json=False)
+        # This should return a 202 code
+        # Note: The success response contains XML, not JSON.
+        return await self._make_request('POST', url)
 
     async def upload_file(self,
                           filename: str,

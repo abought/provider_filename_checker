@@ -39,9 +39,6 @@ class DataverseProvider(NoAuthProvider):
                                'A sample dataset for filename testing',
                                'samwise.gamgee@sacksville-bagend.net')
 
-    async def _make_request(self, *args, **kwargs):
-        return await super(DataverseProvider, self)._make_request(*args, as_json=False, **kwargs)
-
     async def create_folder(self, foldername: str):
         """
         Dataverse does not appear to have a concept of folders, but dataverses can have datasets.
@@ -65,9 +62,7 @@ class DataverseProvider(NoAuthProvider):
         else:
             return None, code
 
-    async def upload_file(self,
-                          filename: str,
-                          content) -> typing.Tuple[dict, int]:
+    async def upload_file(self, filename: str, content):
         """
         See http://guides.dataverse.org/en/4.5/api/sword.html#add-files-to-a-dataset-with-a-zip-file
         

@@ -31,12 +31,11 @@ class WBProvider(OauthBaseProvider):
             'kind': 'folder',
             'name': foldername
         }
-        resp, code = await self._make_request('PUT', url, params=params, headers={'Content-Type': 'application/json'})
-        return resp['data']['attributes']['path'], code
+        resp, code = await self.make_request_get_json('PUT', url, params=params, headers={'Content-Type': 'application/json'})
+        rv = resp['data']['attributes']['path'] if code < 400 else resp
+        return rv, code
 
-    async def upload_file(self,
-                          filename: str,
-                          content) -> typing.Tuple[dict, int]:
+    async def upload_file(self, filename: str, content):
 
         # If a parent folder is specified, append it to the URL. Otherwise just add a trailing slash.
         parent_folder = self.parent_folder or '/'
@@ -46,7 +45,7 @@ class WBProvider(OauthBaseProvider):
             'kind': 'file',
             'name': filename
         }
-        return await self._make_request('PUT', url, params=params, data=content)
+        return await self.make_request_get_json('PUT', url, params=params, data=content)
 
     @staticmethod
     def extract_uploaded_filename(payload: dict=None):

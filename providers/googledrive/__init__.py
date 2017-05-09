@@ -30,10 +30,11 @@ class GoogleDriveProvider(OauthBaseProvider):
             'mimeType': 'application/vnd.google-apps.folder'
         }
 
-        resp, code = await self._make_request('POST', url,
-                                              data=json.dumps(data),
-                                              headers={'Content-Type': 'application/json'})
-        return resp['id'], code
+        resp, code = await self.make_request_get_json('POST', url,
+                                                      data=json.dumps(data),
+                                                      headers={'Content-Type': 'application/json'})
+        rv = resp['id'] if code < 400 else resp
+        return rv, code
 
     async def upload_file(self,
                           filename: str,
@@ -68,7 +69,7 @@ class GoogleDriveProvider(OauthBaseProvider):
                 headers={'charset': 'UTF-8'}
             )
             mpwriter.append(content, headers={'Content-Type': 'text/plain'})
-            return await self._make_request('POST', url, data=mpwriter, params=params, headers=headers)
+            return await self.make_request_get_json('POST', url, data=mpwriter, params=params, headers=headers)
 
     @staticmethod
     def extract_uploaded_filename(payload: dict = None):

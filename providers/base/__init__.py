@@ -32,9 +32,7 @@ class BaseProvider(abc.ABC):
                             data=None,
                             headers: dict=None,
                             params: dict = None,
-                            as_json: bool=True,
-                            **kwargs) -> typing.Tuple[typing.Union[object, dict],
-                                                      int]:
+                            **kwargs) -> typing.Tuple[aiohttp.client.ClientResponse, int]:
 
         headers = headers or {}
         headers.update(self.auth_headers)  # TODO: Move to child class
@@ -42,15 +40,24 @@ class BaseProvider(abc.ABC):
         async with aiohttp.request(method, url, auth=auth, data=data, headers=headers, params=params, **kwargs) as resp:
             code = resp.status
 
-            # print('Sending request to', url, '\n')
-            # print('Response status:', code, resp.reason, '\n')
-            # print('Response headers: ', resp.headers, '\n')
-            # print('Response body: ', await resp.text(), '\n\n\n')
+            print('Sending request to', url, '\n')
+            print('Response status:', code, resp.reason, '\n')
+            print('Response headers: ', resp.headers, '\n')
+            print('Response body: ', await resp.text(), '\n\n\n')
 
-            # Most providers provide the key info in resp json. In rare cases we will need the response object instead
-            val = await resp.json() if as_json else resp
+            return resp, code
 
-        return val, code
+    async def make_request_get_json(self, *args, **kwargs) \
+            -> typing.Tuple[typing.Union[aiohttp.client.ClientResponse, dict], int]:
+        """
+        Many clients will want to parse the response payload as JSON. We will only do this on success for now due to 
+        edge cases in some providers. (eg dropbox returns JSON for success, but text or HTML for some error types)
+        """
+        resp, code = await self._make_request(*args, **kwargs)
+        if code < 400:
+            return await resp.json(), code
+        else:
+            return resp, code
 
     @abc.abstractmethod
     async def authorize(self, *args, **kwargs) -> None:
@@ -61,7 +68,8 @@ class BaseProvider(abc.ABC):
         pass
 
     @abc.abstractmethod
-    async def upload_file(self, filename: str, content) -> typing.Tuple[typing.Union[dict, object],int]:
+    async def upload_file(self, filename: str, content) \
+            -> typing.Tuple[typing.Union[dict, aiohttp.client.ClientResponse], int]:
         pass
 
     @abc.abstractstaticmethod
