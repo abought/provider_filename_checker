@@ -30,11 +30,11 @@ edge cases or a broad range of functionality. Do not use this code in production
 - [ ] Dataverse
   - [ ] Via WB
 - [x] Dropbox
-  - [ ] Via WB
+  - [x] Via WB
 - [ ] Figshare
   - [ ] Via WB
-- [ ] Github
-  - [ ] Via WB
+- [x] Github
+  - [x] Via WB
 - [ ] Google Drive
   - [ ] Via WB
 - [ ] OSFStorage (only uses waterbutler)
