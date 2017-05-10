@@ -40,10 +40,17 @@ edge cases or a broad range of functionality. Do not use this code in production
 - [x] OSFStorage (only uses waterbutler; run locally using Mac OS / docker as backend)
 - [ ] OwnCloud
   - [ ] Via WB
-- [ ] S3
+- [x] S3
   - [x] Via WB
 
 
 ### Comparison worklist
 - [ ] Write a script that compares the "via waterbutler" results to the "pure API" results; consolidate reports
 - [ ] Update internal wiki on provider information
+
+
+## Notes and usage
+The `main.py` script can be invoked via the command line. 
+
+Some of the tests create filenames so strange that they can create problems for, eg, AWS. 
+See the `scripts` directory for helpful utilities to delete files that can't be handled via the web console.

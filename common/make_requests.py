@@ -54,6 +54,7 @@ async def check_one_foldername(provider: providers.BaseProvider,
 
 async def serial_requests(provider: providers.BaseProvider,
                           scenarios: typing.Iterator,
+                          *,
                           delay: typing.Union[float, None]=None) -> typing.AsyncIterator[report.Report]:
     """Make a series of requests to the specified provider"""
     for scenario in scenarios:

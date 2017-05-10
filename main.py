@@ -111,6 +111,7 @@ async def pipeline(provider: providers.BaseProvider,
 
 def run_single_provider(provider_name: str,
                         scenarios: list,
+                        *,
                         delay: typing.Union[float, None]=None,
                         use_wb: bool=False) -> typing.Awaitable:
     """Import the modules associated with a provider, setup connections, then perform the pipeline of requests"""
@@ -142,6 +143,6 @@ if __name__ == '__main__':
 
     loop = loop = asyncio.get_event_loop()
     #futures = main(provider_names=args.providers, scenario_names=args.scenarios, delay=args.delay, use_wb=args.wb)
-    futures = main(provider_names=['osfstorage'], scenario_names=None, use_wb=True, delay=0.2)
+    futures = main(provider_names=['s3'], scenario_names=None, use_wb=False, delay=0.2)
     loop.run_until_complete(asyncio.gather(*futures))
     loop.close()
