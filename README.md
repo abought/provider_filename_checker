@@ -35,8 +35,8 @@ edge cases or a broad range of functionality. Do not use this code in production
   - [ ] Via WB
 - [x] Github
   - [x] Via WB
-- [ ] Google Drive
-  - [ ] Via WB
+- [x] Google Drive
+  - [x] Via WB
 - [ ] OSFStorage (only uses waterbutler)
 - [ ] OwnCloud
   - [ ] Via WB

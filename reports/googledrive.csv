@@ -179,7 +179,7 @@ name.txt","200","exact"
  at position -1","filename.txt
 ","filename.txt
 ","200","exact"
-"Create a folder, then a file with same name (folder)","folderthenfile","0BxGwKGgJtw4Wa2daLTN0bW1IRkU","200",""
+"Create a folder, then a file with same name (folder)","folderthenfile","0BxGwKGgJtw4WTWUyZjM2SGhZNnc","200",""
 "Create a folder, then a file with same name (file)","folderthenfile","folderthenfile","200","exact"
 "Create a file, then a folder with same name (file)","filethenfolder","filethenfolder","200","exact"
-"Create a file, then a folder with same name (folder)","filethenfolder","0BxGwKGgJtw4WaERDRThYQjZVMFU","200",""
+"Create a file, then a folder with same name (folder)","filethenfolder","0BxGwKGgJtw4WSW9yeXlzVjZWOTA","200",""
