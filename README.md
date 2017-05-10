@@ -27,8 +27,8 @@ edge cases or a broad range of functionality. Do not use this code in production
 ### Provider worklist
 - [ ] Box
   - [ ] Via WB
-- [ ] Dataverse
-  - [ ] Via WB
+- [x] Dataverse
+  - [x] Via WB (define a clean dataset in advance; had to turn off parent folder creation manually due to wb api limits)
 - [x] Dropbox
   - [x] Via WB
 - [ ] Figshare
