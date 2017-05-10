@@ -41,7 +41,7 @@ edge cases or a broad range of functionality. Do not use this code in production
 - [ ] OwnCloud
   - [ ] Via WB
 - [ ] S3
-  - [ ] Via WB
+  - [x] Via WB
 
 
 ### Comparison worklist
