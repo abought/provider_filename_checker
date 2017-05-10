@@ -31,8 +31,8 @@ edge cases or a broad range of functionality. Do not use this code in production
   - [x] Via WB (define a clean dataset in advance; had to turn off parent folder creation manually due to wb api limits)
 - [x] Dropbox
   - [x] Via WB
-- [ ] Figshare
-  - [ ] Via WB
+- [x] Figshare
+  - [ ] Via WB- blocked by 500 code bug on success (define a clean dataset in advance; had to turn off parent folder creation manually due to wb api limits)
 - [x] Github
   - [x] Via WB
 - [x] Google Drive
