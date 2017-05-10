@@ -142,6 +142,6 @@ if __name__ == '__main__':
 
     loop = loop = asyncio.get_event_loop()
     #futures = main(provider_names=args.providers, scenario_names=args.scenarios, delay=args.delay, use_wb=args.wb)
-    futures = main(provider_names=['googledrive'], scenario_names=None, use_wb=True, delay=0.2)
+    futures = main(provider_names=['osfstorage'], scenario_names=None, use_wb=True, delay=0.2)
     loop.run_until_complete(asyncio.gather(*futures))
     loop.close()
