@@ -77,7 +77,8 @@ def load_scenarios(filenames: list):
 
 async def pipeline(provider: providers.BaseProvider,
                    scenarios, *,
-                   delay: typing.Union[float, None]=None):
+                   delay: typing.Union[float, None]=None,
+                   use_wb: bool=False):
     """
     Define a pipeline of tasks to run in series
     
@@ -102,7 +103,9 @@ async def pipeline(provider: providers.BaseProvider,
 
     trial_reports = make_requests.serial_requests(provider, scenarios, delay=delay)
 
-    out_fn = os.path.join(REPORTS_PATH, f'{provider.provider_name}.csv')
+    report_path = REPORTS_PATH if not use_wb else os.path.join(REPORTS_PATH, 'waterbutler')
+    os.makedirs(report_path, exist_ok=True)
+    out_fn = os.path.join(report_path, f'{provider.provider_name}.csv')
     await report.report_writer(trial_reports, provider.provider_name, out_fn=out_fn)
 
 
@@ -118,7 +121,7 @@ def run_single_provider(provider_name: str,
 
     provider = ProviderClass(provider_name=provider_name)
 
-    return asyncio.ensure_future(pipeline(provider, scenarios, delay=delay))
+    return asyncio.ensure_future(pipeline(provider, scenarios, delay=delay, use_wb=use_wb))
 
 
 def main(*, provider_names: typing.Iterable[str]=(),
@@ -139,6 +142,6 @@ if __name__ == '__main__':
 
     loop = loop = asyncio.get_event_loop()
     #futures = main(provider_names=args.providers, scenario_names=args.scenarios, delay=args.delay, use_wb=args.wb)
-    futures = main(provider_names=['dropbox'], scenario_names=None, use_wb=False, delay=0.2)
+    futures = main(provider_names=['dropbox'], scenario_names=None, use_wb=True, delay=0.2)
     loop.run_until_complete(asyncio.gather(*futures))
     loop.close()
